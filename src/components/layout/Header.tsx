@@ -22,7 +22,7 @@ export const Header = () => {
           <div className="flex items-center">
             <Shield className="h-8 w-8 text-[#7030a0]" />
             <h1 className="ml-2 text-xl font-semibold text-gray-900">
-              ComplyHub Powered By Vivacity Coaching and Consulting
+              ComplyHub <span className="text-sm font-normal">Powered By Vivacity Coaching and Consulting</span>
             </h1>
           </div>
           

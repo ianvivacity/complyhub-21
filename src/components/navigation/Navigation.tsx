@@ -54,8 +54,8 @@ export const Navigation = () => {
   );
 
   return (
-    <nav className="bg-white shadow-sm border-r">
-      <div className="px-4 py-6">
+    <nav className="bg-white shadow-sm border-r h-full">
+      <div className="px-4 py-6 h-full">
         <ul className="space-y-2">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;

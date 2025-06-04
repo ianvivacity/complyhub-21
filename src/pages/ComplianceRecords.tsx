@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,9 +9,18 @@ import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { AddComplianceDialog } from '@/components/compliance/AddComplianceDialog';
 
 export const ComplianceRecords = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  // Check if we should filter by overdue items from URL
+  useEffect(() => {
+    const filterParam = searchParams.get('filter');
+    if (filterParam === 'overdue') {
+      setStatusFilter('overdue');
+    }
+  }, [searchParams]);
 
   const complianceRecords = [
     {
@@ -76,7 +86,14 @@ export const ComplianceRecords = () => {
     const matchesSearch = record.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.standardClause.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.responsiblePerson.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || record.status.toLowerCase() === statusFilter.toLowerCase();
+    
+    let matchesStatus = true;
+    if (statusFilter === 'overdue') {
+      matchesStatus = record.reviewStatus.toLowerCase() === 'overdue';
+    } else if (statusFilter !== 'all') {
+      matchesStatus = record.status.toLowerCase() === statusFilter.toLowerCase();
+    }
+    
     return matchesSearch && matchesStatus;
   });
 
@@ -149,6 +166,7 @@ export const ComplianceRecords = () => {
                   <SelectItem value="compliant">Compliant</SelectItem>
                   <SelectItem value="at risk">At Risk</SelectItem>
                   <SelectItem value="non-compliant">Non-Compliant</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
                 </SelectContent>
               </Select>
             </div>

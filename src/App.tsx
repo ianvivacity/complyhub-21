@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import { Header } from "@/components/layout/Header";
 import { Navigation } from "@/components/navigation/Navigation";
 import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
+import { Dashboard } from "@/pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -19,16 +21,16 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-gray-50 flex flex-col">
             <ProtectedRoute>
               <Header />
-              <div className="flex">
-                <div className="w-64 min-h-[calc(100vh-4rem)]">
+              <div className="flex flex-1">
+                <div className="w-64 flex-shrink-0">
                   <Navigation />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 overflow-auto">
                   <Routes>
-                    <Route path="/" element={<ComplianceRecords />} />
+                    <Route path="/" element={<Dashboard />} />
                     <Route 
                       path="/compliance" 
                       element={<ComplianceRecords />} 
