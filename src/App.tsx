@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { Header } from "@/components/layout/Header";
 import { Navigation } from "@/components/navigation/Navigation";
-import { Dashboard } from "@/pages/Dashboard";
+import { ComplianceRecords } from "@/pages/ComplianceRecords";
+import { Standards } from "@/pages/Standards";
 
 const queryClient = new QueryClient();
 
@@ -28,24 +28,14 @@ const App = () => (
                 </div>
                 <div className="flex-1">
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/" element={<ComplianceRecords />} />
                     <Route 
                       path="/compliance" 
-                      element={
-                        <div className="p-6">
-                          <h1 className="text-3xl font-bold">Compliance Records</h1>
-                          <p className="text-gray-600 mt-2">Manage your compliance records here.</p>
-                        </div>
-                      } 
+                      element={<ComplianceRecords />} 
                     />
                     <Route 
                       path="/standards" 
-                      element={
-                        <div className="p-6">
-                          <h1 className="text-3xl font-bold">Standards</h1>
-                          <p className="text-gray-600 mt-2">Manage your compliance standards here.</p>
-                        </div>
-                      } 
+                      element={<Standards />} 
                     />
                     <Route 
                       path="/team" 
