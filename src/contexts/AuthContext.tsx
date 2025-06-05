@@ -3,25 +3,18 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-interface Profile {
-  id: string;
-  email: string;
-  full_name?: string;
-  organisation_name?: string;
-  rto_id?: string;
-}
-
 interface OrganisationMember {
   id: string;
   user_id: string;
   organisation_id: string;
   role: 'admin' | 'member';
+  email: string;
+  full_name?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: Profile | null;
   organisationMember: OrganisationMember | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, organisationName: string, rtoId?: string) => Promise<{ error?: any }>;
@@ -42,24 +35,12 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [organisationMember, setOrganisationMember] = useState<OrganisationMember | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      // Fetch organisation member data
+      // Fetch organisation member data (which now includes profile info)
       const { data: memberData } = await supabase
         .from('organisation_members')
         .select('*')
@@ -86,7 +67,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             fetchUserData(session.user.id);
           }, 0);
         } else {
-          setProfile(null);
           setOrganisationMember(null);
         }
         setLoading(false);
@@ -144,7 +124,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     session,
-    profile,
     organisationMember,
     loading,
     signUp,

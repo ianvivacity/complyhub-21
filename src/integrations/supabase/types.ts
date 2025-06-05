@@ -68,6 +68,8 @@ export type Database = {
       organisation_members: {
         Row: {
           created_at: string
+          email: string
+          full_name: string | null
           id: string
           organisation_id: string
           role: Database["public"]["Enums"]["user_role"]
@@ -76,6 +78,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email: string
+          full_name?: string | null
           id?: string
           organisation_id: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -84,6 +88,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string
+          full_name?: string | null
           id?: string
           organisation_id?: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -119,36 +125,6 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
-          rto_id?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          email: string
-          full_name: string | null
-          id: string
-          organisation_name: string | null
-          rto_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          full_name?: string | null
-          id: string
-          organisation_name?: string | null
-          rto_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          full_name?: string | null
-          id?: string
-          organisation_name?: string | null
           rto_id?: string | null
           updated_at?: string
         }

@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,13 +12,24 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AddComplianceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
-export const AddComplianceDialog = ({ open, onOpenChange }: AddComplianceDialogProps) => {
+interface TeamMember {
+  id: string;
+  full_name: string;
+  email: string;
+}
+
+export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddComplianceDialogProps) => {
+  const { organisationMember } = useAuth();
+  const { toast } = useToast();
   const [complianceItem, setComplianceItem] = useState('');
   const [status, setStatus] = useState('');
   const [responsiblePerson, setResponsiblePerson] = useState('');
@@ -25,27 +37,105 @@ export const AddComplianceDialog = ({ open, onOpenChange }: AddComplianceDialogP
   const [notes, setNotes] = useState('');
   const [nextReviewDate, setNextReviewDate] = useState<Date>();
   const [evidence, setEvidence] = useState<FileList | null>(null);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [standards, setStandards] = useState<any[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isAdmin = organisationMember?.role === 'admin';
+
+  // Set current user as default responsible person for non-admin users
+  useEffect(() => {
+    if (!isAdmin && organisationMember) {
+      setResponsiblePerson(organisationMember.full_name || organisationMember.email);
+    }
+  }, [isAdmin, organisationMember]);
+
+  // Fetch team members for admin users
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      if (!isAdmin || !organisationMember?.organisation_id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('organisation_members')
+          .select('id, full_name, email')
+          .eq('organisation_id', organisationMember.organisation_id);
+
+        if (error) throw error;
+        setTeamMembers(data || []);
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [isAdmin, organisationMember]);
+
+  // Fetch standards for dropdown
+  useEffect(() => {
+    const fetchStandards = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('standards')
+          .select('*')
+          .order('standard_clause', { ascending: true });
+
+        if (error) throw error;
+        setStandards(data || []);
+      } catch (error) {
+        console.error('Error fetching standards:', error);
+      }
+    };
+
+    fetchStandards();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Creating compliance record:', {
-      complianceItem,
-      status,
-      responsiblePerson,
-      standardClause,
-      notes,
-      nextReviewDate,
-      evidence
-    });
-    onOpenChange(false);
-    // Reset form
-    setComplianceItem('');
-    setStatus('');
-    setResponsiblePerson('');
-    setStandardClause('');
-    setNotes('');
-    setNextReviewDate(undefined);
-    setEvidence(null);
+    if (!organisationMember?.organisation_id) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('compliance_records')
+        .insert({
+          compliance_item: complianceItem,
+          compliance_status: status,
+          responsible_person: responsiblePerson,
+          standard_clause: standardClause,
+          notes,
+          next_review_date: nextReviewDate ? format(nextReviewDate, 'yyyy-MM-dd') : null,
+          organisation_id: organisationMember.organisation_id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Compliance record created successfully",
+      });
+
+      onSuccess();
+      onOpenChange(false);
+      
+      // Reset form
+      setComplianceItem('');
+      setStatus('');
+      setResponsiblePerson(isAdmin ? '' : (organisationMember.full_name || organisationMember.email));
+      setStandardClause('');
+      setNotes('');
+      setNextReviewDate(undefined);
+      setEvidence(null);
+    } catch (error) {
+      console.error('Error creating compliance record:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create compliance record",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,9 +165,9 @@ export const AddComplianceDialog = ({ open, onOpenChange }: AddComplianceDialogP
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="compliant">Compliant</SelectItem>
-                  <SelectItem value="at-risk">At Risk</SelectItem>
-                  <SelectItem value="non-compliant">Non-Compliant</SelectItem>
+                  <SelectItem value="Compliant">Compliant</SelectItem>
+                  <SelectItem value="At Risk">At Risk</SelectItem>
+                  <SelectItem value="Non-Compliant">Non-Compliant</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -86,15 +176,26 @@ export const AddComplianceDialog = ({ open, onOpenChange }: AddComplianceDialogP
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="responsiblePerson">Responsible Person *</Label>
-              <Select value={responsiblePerson} onValueChange={setResponsiblePerson} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select team member" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="carlo-legada">Carlo Legada</SelectItem>
-                  <SelectItem value="ian-baterna">Ian Baterna</SelectItem>
-                </SelectContent>
-              </Select>
+              {isAdmin ? (
+                <Select value={responsiblePerson} onValueChange={setResponsiblePerson} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teamMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.full_name || member.email}>
+                        {member.full_name || member.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={responsiblePerson}
+                  disabled
+                  className="bg-gray-100"
+                />
+              )}
             </div>
             
             <div>
@@ -132,10 +233,11 @@ export const AddComplianceDialog = ({ open, onOpenChange }: AddComplianceDialogP
                 <SelectValue placeholder="Select a standard clause" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cs1.05">CS1.05</SelectItem>
-                <SelectItem value="cs3.1">CS3.1</SelectItem>
-                <SelectItem value="members-only">Members Only</SelectItem>
-                <SelectItem value="demo-202">demo 202</SelectItem>
+                {standards.map((standard) => (
+                  <SelectItem key={standard.id} value={standard.standard_clause}>
+                    {standard.standard_clause}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -172,9 +274,10 @@ export const AddComplianceDialog = ({ open, onOpenChange }: AddComplianceDialogP
             </Button>
             <Button
               type="submit"
+              disabled={loading}
               className="bg-[#7030a0] hover:bg-[#5e2680] text-white"
             >
-              Create Record
+              {loading ? 'Creating...' : 'Create Record'}
             </Button>
           </div>
         </form>

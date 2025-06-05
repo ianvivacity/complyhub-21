@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Shield, LogOut, Bell } from 'lucide-react';
 
 export const Header = () => {
-  const { user, profile, organisationMember, signOut } = useAuth();
+  const { user, organisationMember, signOut } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -35,7 +35,7 @@ export const Header = () => {
                 </span>
               </Button>
               <span className="text-sm text-gray-700">
-                Welcome, {user.email} ({getUserRole()})
+                Welcome, {organisationMember?.full_name || user.email} ({getUserRole()})
               </span>
               <Button 
                 variant="outline" 

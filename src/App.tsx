@@ -11,6 +11,7 @@ import { Navigation } from "@/components/navigation/Navigation";
 import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
 import { Dashboard } from "@/pages/Dashboard";
+import { TeamMembers } from "@/pages/TeamMembers";
 
 const queryClient = new QueryClient();
 
@@ -41,12 +42,7 @@ const App = () => (
                     />
                     <Route 
                       path="/team" 
-                      element={
-                        <div className="p-6">
-                          <h1 className="text-3xl font-bold">Team Members</h1>
-                          <p className="text-gray-600 mt-2">Manage your organisation members here.</p>
-                        </div>
-                      } 
+                      element={<TeamMembers />} 
                     />
                     <Route 
                       path="/settings" 
