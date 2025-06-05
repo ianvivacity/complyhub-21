@@ -39,13 +39,13 @@ export const Navigation = () => {
       name: 'Team Members',
       href: '/team',
       icon: Users,
-      adminOnly: false
+      adminOnly: true // Changed: Only admins can see team members
     },
     {
       name: 'Settings',
       href: '/settings',
       icon: Settings,
-      adminOnly: true
+      adminOnly: false // Changed: All users can access settings
     }
   ];
 
