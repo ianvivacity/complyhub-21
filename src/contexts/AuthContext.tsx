@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface OrganisationMember {
   id: string;
-  user_id: string;
   organisation_id: string;
   role: 'admin' | 'member';
   email: string;
@@ -44,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: memberData } = await supabase
         .from('organisation_members')
         .select('*')
-        .eq('user_id', userId)
+        .eq('id', userId)
         .single();
 
       if (memberData) {
