@@ -12,16 +12,15 @@ export const Header = () => {
   };
 
   const getUserRole = () => {
-    const role = organisationMember?.role || 'member';
-    return role === 'admin' ? 'parent' : 'child';
+    return organisationMember?.role || 'member';
   };
 
   const getRoleStyles = (role: string) => {
     const baseStyles = "px-3 py-1 text-xs font-medium text-white rounded-full shadow-sm";
     switch (role) {
-      case 'parent':
+      case 'admin':
         return `${baseStyles} bg-[#ee1878]`;
-      case 'child':
+      case 'member':
         return `${baseStyles} bg-[#01b0f1]`;
       default:
         return `${baseStyles} bg-gray-500`;
