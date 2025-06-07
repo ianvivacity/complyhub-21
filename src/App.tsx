@@ -11,6 +11,7 @@ import { Navigation } from "@/components/navigation/Navigation";
 import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
 import { TeamMembers } from "@/pages/TeamMembers";
+import { Settings } from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -41,14 +42,7 @@ const App = () => (
                     />
                     <Route 
                       path="/settings" 
-                      element={
-                        <ProtectedRoute adminOnly>
-                          <div className="p-6">
-                            <h1 className="text-3xl font-bold">Settings</h1>
-                            <p className="text-gray-600 mt-2">Configure system settings (Admin only).</p>
-                          </div>
-                        </ProtectedRoute>
-                      } 
+                      element={<Settings />} 
                     />
                   </Routes>
                 </div>

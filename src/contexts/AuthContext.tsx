@@ -9,6 +9,7 @@ interface OrganisationMember {
   role: 'admin' | 'member';
   email: string;
   full_name?: string;
+  organisation_name?: string;
 }
 
 interface AuthContextType {
@@ -39,15 +40,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch organisation member data (which now includes profile info)
+      // Fetch organisation member data with organisation name
       const { data: memberData } = await supabase
         .from('organisation_members')
-        .select('*')
+        .select(`
+          *,
+          organisations!inner(name)
+        `)
         .eq('id', userId)
         .single();
 
       if (memberData) {
-        setOrganisationMember(memberData);
+        setOrganisationMember({
+          ...memberData,
+          organisation_name: memberData.organisations.name
+        });
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
