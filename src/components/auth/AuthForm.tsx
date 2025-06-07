@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Mail, Lock } from 'lucide-react';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,29 +53,37 @@ export const AuthForm = () => {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>ComplyHub Tracker</CardTitle>
-          <CardDescription>Powered by Vivacity Coaching & Consulting</CardDescription>
+          <CardDescription style={{ paddingTop: '20px' }}>Powered by Vivacity Coaching & Consulting</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
             <div>
               <Label htmlFor="signin-email">Email</Label>
-              <Input
-                id="signin-email"
-                type="email"
-                value={signInData.email}
-                onChange={(e) => setSignInData({...signInData, email: e.target.value})}
-                required
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="signin-email"
+                  type="email"
+                  value={signInData.email}
+                  onChange={(e) => setSignInData({...signInData, email: e.target.value})}
+                  required
+                  className="pl-10"
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="signin-password">Password</Label>
-              <Input
-                id="signin-password"
-                type="password"
-                value={signInData.password}
-                onChange={(e) => setSignInData({...signInData, password: e.target.value})}
-                required
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="signin-password"
+                  type="password"
+                  value={signInData.password}
+                  onChange={(e) => setSignInData({...signInData, password: e.target.value})}
+                  required
+                  className="pl-10"
+                />
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign In'}
