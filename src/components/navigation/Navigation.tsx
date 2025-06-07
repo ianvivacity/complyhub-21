@@ -7,8 +7,7 @@ import {
   Database, 
   FileText, 
   Users, 
-  Settings, 
-  BarChart3 
+  Settings
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -18,14 +17,8 @@ export const Navigation = () => {
 
   const navItems = [
     {
-      name: 'Dashboard',
-      href: '/',
-      icon: BarChart3,
-      adminOnly: false
-    },
-    {
       name: 'Compliance Records',
-      href: '/compliance',
+      href: '/',
       icon: Database,
       adminOnly: false
     },
@@ -54,8 +47,8 @@ export const Navigation = () => {
   );
 
   return (
-    <nav className="bg-white shadow-sm border-r h-full">
-      <div className="px-4 py-6 h-full">
+    <nav className="bg-white shadow-sm border-r h-full flex flex-col">
+      <div className="px-4 py-6 flex-1">
         <ul className="space-y-2">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
@@ -79,6 +72,13 @@ export const Navigation = () => {
             );
           })}
         </ul>
+      </div>
+      
+      {/* Organization name at bottom */}
+      <div className="px-4 py-4 border-t">
+        <div className="text-sm font-medium text-gray-600">
+          {organisationMember?.organisations?.name || 'Organization Name'}
+        </div>
       </div>
     </nav>
   );

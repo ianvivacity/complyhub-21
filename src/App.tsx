@@ -10,7 +10,6 @@ import { Header } from "@/components/layout/Header";
 import { Navigation } from "@/components/navigation/Navigation";
 import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
-import { Dashboard } from "@/pages/Dashboard";
 import { TeamMembers } from "@/pages/TeamMembers";
 
 const queryClient = new QueryClient();
@@ -31,11 +30,7 @@ const App = () => (
                 </div>
                 <div className="flex-1 overflow-auto">
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route 
-                      path="/compliance" 
-                      element={<ComplianceRecords />} 
-                    />
+                    <Route path="/" element={<ComplianceRecords />} />
                     <Route 
                       path="/standards" 
                       element={<Standards />} 

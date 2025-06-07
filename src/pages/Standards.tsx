@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, FileText } from 'lucide-react';
 import { AddStandardDialog } from '@/components/standards/AddStandardDialog';
 
 export const Standards = () => {
@@ -45,7 +45,10 @@ export const Standards = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Standards Management</h1>
+        <div className="flex items-center">
+          <FileText className="h-8 w-8 text-[#7030a0] mr-3" />
+          <h1 className="text-3xl font-bold text-gray-900">Standards Management</h1>
+        </div>
         <Button 
           onClick={() => setIsAddDialogOpen(true)}
           className="bg-[#7030a0] hover:bg-[#5e2680] text-white"

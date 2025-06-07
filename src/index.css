@@ -79,6 +79,10 @@
   }
 }
 
+.text-3xl {
+  font-size: 22px;
+}
+
 .custom-primary {
   background-color: #7030a0;
 }

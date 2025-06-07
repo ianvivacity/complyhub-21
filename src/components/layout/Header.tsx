@@ -15,6 +15,18 @@ export const Header = () => {
     return organisationMember?.role || 'member';
   };
 
+  const getRoleStyles = (role: string) => {
+    const baseStyles = "px-3 py-1 text-xs font-medium text-white rounded-full shadow-sm";
+    switch (role) {
+      case 'admin':
+        return `${baseStyles} bg-[#ee1878]`;
+      case 'member':
+        return `${baseStyles} bg-[#01b0f1]`;
+      default:
+        return `${baseStyles} bg-gray-500`;
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,7 +47,10 @@ export const Header = () => {
                 </span>
               </Button>
               <span className="text-sm text-gray-700">
-                Welcome, {organisationMember?.full_name || user.email} ({getUserRole()})
+                Welcome, {organisationMember?.full_name || user.email}
+              </span>
+              <span className={getRoleStyles(getUserRole())}>
+                {getUserRole()}
               </span>
               <Button 
                 variant="outline" 

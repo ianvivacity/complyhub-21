@@ -160,9 +160,13 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_user_organisation_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
-        Args: { user_id: string; org_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
+        Args: Record<PropertyKey, never> | { user_id: string; org_id: string }
+        Returns: string
       }
       send_invitation: {
         Args: {

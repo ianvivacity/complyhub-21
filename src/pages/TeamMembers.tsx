@@ -120,10 +120,7 @@ export const TeamMembers = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Organisation Members</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <div className="relative">

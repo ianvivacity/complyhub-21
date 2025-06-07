@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Database, BarChart3, Users, AlertTriangle } from 'lucide-react';
 import { AddComplianceDialog } from '@/components/compliance/AddComplianceDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -101,25 +101,29 @@ export const ComplianceRecords = () => {
         `${Math.round((complianceRecords.filter(r => r.compliance_status === 'Compliant').length / complianceRecords.length) * 100)}%` : 
         '0%', 
       subtitle: `${complianceRecords.filter(r => r.compliance_status === 'Compliant').length} of ${complianceRecords.length} items compliant`, 
-      color: 'bg-green-500' 
+      icon: BarChart3,
+      iconColor: 'text-green-500' 
     },
     { 
       label: 'Total Records', 
       value: complianceRecords.length.toString(), 
       subtitle: 'Compliance items tracked', 
-      color: 'bg-blue-500' 
+      icon: Database,
+      iconColor: 'text-blue-500' 
     },
     { 
       label: 'Non-Compliant', 
       value: complianceRecords.filter(r => r.compliance_status === 'Non-Compliant').length.toString(), 
       subtitle: 'Items requiring attention', 
-      color: 'bg-red-500' 
+      icon: AlertTriangle,
+      iconColor: 'text-red-500' 
     },
     { 
       label: 'At Risk', 
       value: complianceRecords.filter(r => r.compliance_status === 'At Risk').length.toString(), 
       subtitle: 'Items being addressed', 
-      color: 'bg-yellow-500' 
+      icon: Users,
+      iconColor: 'text-yellow-500' 
     }
   ];
 
@@ -163,25 +167,37 @@ export const ComplianceRecords = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">ComplyHub.ai Dashboard</h1>
+        <div className="flex items-center">
+          <Database className="h-8 w-8 text-[#7030a0] mr-3" />
+          <h1 className="text-3xl font-bold text-gray-900">Compliance Records</h1>
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <Card key={index} className={`${stat.color} text-white`}>
-            <CardContent className="p-6">
-              <div className="text-sm font-medium opacity-90">{stat.label}</div>
-              <div className="text-3xl font-bold mt-2">{stat.value}</div>
-              <div className="text-sm opacity-80 mt-1">{stat.subtitle}</div>
-            </CardContent>
-          </Card>
-        ))}
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index} className="bg-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-gray-600">{stat.label}</div>
+                    <div className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</div>
+                    <div className="text-sm text-gray-500 mt-1">{stat.subtitle}</div>
+                  </div>
+                  <div className={`p-3 rounded-full bg-gray-100 ${stat.iconColor}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Compliance Records Section */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Compliance Records</h2>
         <Button 
           onClick={() => setIsAddDialogOpen(true)}
           className="bg-[#7030a0] hover:bg-[#5e2680] text-white"
@@ -255,16 +271,16 @@ export const ComplianceRecords = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
-                        <Button variant="link" size="sm" className="text-[#7030a0] p-0">
-                          Edit
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button 
-                          variant="link" 
+                          variant="ghost" 
                           size="sm" 
-                          className="text-red-600 p-0"
+                          className="text-red-600 hover:text-red-700"
                           onClick={() => handleDeleteRecord(record.id)}
                         >
-                          Delete
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>
