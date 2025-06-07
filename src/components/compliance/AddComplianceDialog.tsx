@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, X } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,7 +36,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
   const [standardClause, setStandardClause] = useState('');
   const [notes, setNotes] = useState('');
   const [nextReviewDate, setNextReviewDate] = useState<Date>();
-  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
+  const [evidence, setEvidence] = useState<FileList | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
   const [standards, setStandards] = useState<any[]>([]);
@@ -124,7 +125,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
       setStandardClause('');
       setNotes('');
       setNextReviewDate(undefined);
-      setEvidenceFiles([]);
+      setEvidence(null);
     } catch (error) {
       console.error('Error creating compliance record:', error);
       toast({
@@ -135,17 +136,6 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setEvidenceFiles(prev => [...prev, ...newFiles]);
-    }
-  };
-
-  const removeFile = (index: number) => {
-    setEvidenceFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -269,30 +259,9 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
               id="evidence"
               type="file"
               multiple
-              onChange={handleFileChange}
+              onChange={(e) => setEvidence(e.target.files)}
               className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#7030a0] file:text-white hover:file:bg-[#5e2680]"
             />
-            
-            {/* Display uploaded files */}
-            {evidenceFiles.length > 0 && (
-              <div className="mt-3 space-y-2">
-                <Label className="text-sm font-medium">Selected Files:</Label>
-                {evidenceFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
-                    <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700 p-1 h-6 w-6"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           
           <div className="flex justify-end space-x-2 pt-4">
