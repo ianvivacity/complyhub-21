@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Mail } from 'lucide-react';
+import { Users, Mail, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 export const TeamMembers = () => {
@@ -127,7 +127,10 @@ export const TeamMembers = () => {
       {isAdmin && (
         <Card>
           <CardHeader>
-            <CardTitle style={{ fontSize: '18px' }}>Invite New Member</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <UserPlus className="h-5 w-5" />
+              <span>Invite New Member</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleInvite} className="space-y-4">
@@ -168,7 +171,7 @@ export const TeamMembers = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle style={{ fontSize: '18px' }}>Current Team Members</CardTitle>
+          <CardTitle>Current Team Members</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
