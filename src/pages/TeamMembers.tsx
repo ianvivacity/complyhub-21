@@ -1,197 +1,212 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface TeamMember {
-  id: string;
-  email: string;
-  full_name: string;
-  role: 'admin' | 'member';
-  created_at: string;
-}
+import { Users, Mail, UserPlus } from 'lucide-react';
+import { useState } from 'react';
 
 export const TeamMembers = () => {
   const { organisationMember } = useAuth();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  const queryClient = useQueryClient();
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'admin' | 'member'>('member');
+  
   const isAdmin = organisationMember?.role === 'admin';
 
-  const fetchTeamMembers = async () => {
-    if (!organisationMember?.organisation_id) return;
-
-    try {
+  const { data: teamMembers = [], isLoading } = useQuery({
+    queryKey: ['team-members'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('organisation_members')
         .select('*')
-        .eq('organisation_id', organisationMember.organisation_id)
-        .order('created_at', { ascending: false });
-
+        .eq('organisation_id', organisationMember?.organisation_id);
+      
       if (error) throw error;
-      setTeamMembers(data || []);
-    } catch (error) {
-      console.error('Error fetching team members:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch team members",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data;
+    },
+    enabled: !!organisationMember?.organisation_id
+  });
 
-  useEffect(() => {
-    fetchTeamMembers();
-  }, [organisationMember]);
-
-  const handleRoleUpdate = async (memberId: string, newRole: 'admin' | 'member') => {
-    try {
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ memberId, newRole }: { memberId: string, newRole: 'admin' | 'member' }) => {
       const { error } = await supabase
         .from('organisation_members')
         .update({ role: newRole })
         .eq('id', memberId);
-
+      
       if (error) throw error;
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-members'] });
       toast({
         title: "Success",
-        description: "Member role updated successfully",
+        description: "Member role updated successfully"
       });
-
-      fetchTeamMembers();
-    } catch (error) {
-      console.error('Error updating role:', error);
+    },
+    onError: (error) => {
       toast({
         title: "Error",
         description: "Failed to update member role",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
-  };
+  });
 
-  const filteredMembers = teamMembers.filter(member =>
-    member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (member.full_name && member.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const getRoleBadge = (role: string) => {
-    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-    switch (role) {
-      case 'admin':
-        return `${baseClasses} bg-purple-100 text-purple-800`;
-      case 'member':
-        return `${baseClasses} bg-blue-100 text-blue-800`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
+  const inviteMutation = useMutation({
+    mutationFn: async ({ email, role }: { email: string, role: 'admin' | 'member' }) => {
+      const { data, error } = await supabase.rpc('send_invitation', {
+        _email: email,
+        _organisation_id: organisationMember?.organisation_id
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Invitation sent successfully"
+      });
+      setInviteEmail('');
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to send invitation",
+        variant: "destructive"
+      });
     }
+  });
+
+  const handleRoleUpdate = (memberId: string, newRole: 'admin' | 'member') => {
+    updateRoleMutation.mutate({ memberId, newRole });
   };
 
-  if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="text-lg">Loading team members...</div>
-      </div>
-    );
+  const handleInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    
+    inviteMutation.mutate({ 
+      email: inviteEmail, 
+      role: inviteRole 
+    });
+  };
+
+  const getRoleLabel = (role: string) => {
+    return role === 'admin' ? 'parent' : 'child';
+  };
+
+  const getRoleValue = (label: string) => {
+    return label === 'parent' ? 'admin' : 'member';
+  };
+
+  if (isLoading) {
+    return <div className="p-6">Loading...</div>;
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center">
-          <Users className="h-8 w-8 text-[#7030a0] mr-3" />
-          <h1 className="text-3xl font-bold text-gray-900">Team Members</h1>
-        </div>
-        {isAdmin && (
-          <Button className="bg-[#7030a0] hover:bg-[#5e2680] text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Invite Member
-          </Button>
-        )}
+    <div className="p-6 space-y-6">
+      <div className="flex items-center space-x-3">
+        <Users className="h-8 w-8 text-[#7030a0]" />
+        <h1 className="text-3xl font-bold">Team Members</h1>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <UserPlus className="h-5 w-5" />
+              <span>Invite New Member</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleInvite} className="space-y-4">
+              <div>
+                <Label htmlFor="invite-email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    required
+                    className="pl-10"
+                  />
+                </div>
               </div>
-            </div>
-          </div>
+              <div>
+                <Label htmlFor="invite-role">Role</Label>
+                <Select value={getRoleLabel(inviteRole)} onValueChange={(value) => setInviteRole(getRoleValue(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="child">Child</SelectItem>
+                    <SelectItem value="parent">Parent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" disabled={inviteMutation.isPending}>
+                {inviteMutation.isPending ? 'Sending...' : 'Send Invitation'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Email</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Role</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Joined</th>
-                  {isAdmin && <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMembers.map((member) => (
-                  <tr key={member.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">
-                      {member.full_name || 'No name provided'}
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{member.email}</td>
-                    <td className="py-3 px-4">
-                      <span className={getRoleBadge(member.role)}>
-                        {member.role}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">
-                      {new Date(member.created_at).toLocaleDateString()}
-                    </td>
-                    {isAdmin && (
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <Select
-                            value={member.role}
-                            onValueChange={(newRole: 'admin' | 'member') => 
-                              handleRoleUpdate(member.id, newRole)
-                            }
-                          >
-                            <SelectTrigger className="w-24">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="member">Member</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Team Members</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1">
+                  <div className="font-medium">{member.full_name || member.email}</div>
+                  <div className="text-sm text-gray-500">{member.email}</div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    member.role === 'admin' 
+                      ? 'bg-[#ee1878] text-white' 
+                      : 'bg-[#01b0f1] text-white'
+                  }`}>
+                    {getRoleLabel(member.role)}
+                  </span>
+                  {isAdmin && member.id !== organisationMember?.id && (
+                    <Select 
+                      value={getRoleLabel(member.role)} 
+                      onValueChange={(value) => handleRoleUpdate(member.id, getRoleValue(value))}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="child">Child</SelectItem>
+                        <SelectItem value="parent">Parent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-
-          {filteredMembers.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No team members found matching your search.
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
