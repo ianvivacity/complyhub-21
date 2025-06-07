@@ -77,7 +77,7 @@ export const Navigation = () => {
       {/* Organization name at bottom */}
       <div className="px-4 py-4 border-t">
         <div className="text-sm font-medium text-gray-600">
-          {organisationMember?.organisation_name || 'Organization Name'}
+          {organisationMember?.organisations?.name || 'Organization Name'}
         </div>
       </div>
     </nav>
