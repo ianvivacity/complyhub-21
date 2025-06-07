@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Users } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
 
 interface TeamMember {
   id: string;
@@ -15,6 +15,7 @@ interface TeamMember {
   full_name: string;
   role: 'admin' | 'member';
   created_at: string;
+  phone_number?: string;
 }
 
 export const TeamMembers = () => {
@@ -111,12 +112,7 @@ export const TeamMembers = () => {
           <Users className="h-8 w-8 text-[#7030a0] mr-3" />
           <h1 className="text-3xl font-bold text-gray-900">Team Members</h1>
         </div>
-        {isAdmin && (
-          <Button className="bg-[#7030a0] hover:bg-[#5e2680] text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Invite Member
-          </Button>
-        )}
+        {isAdmin && <InviteMemberDialog />}
       </div>
 
       <Card>
@@ -141,6 +137,7 @@ export const TeamMembers = () => {
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Email</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-500">Phone</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Role</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Joined</th>
                   {isAdmin && <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>}
@@ -153,6 +150,9 @@ export const TeamMembers = () => {
                       {member.full_name || 'No name provided'}
                     </td>
                     <td className="py-3 px-4 text-gray-600">{member.email}</td>
+                    <td className="py-3 px-4 text-gray-600">
+                      {member.phone_number || 'Not provided'}
+                    </td>
                     <td className="py-3 px-4">
                       <span className={getRoleBadge(member.role)}>
                         {member.role}
