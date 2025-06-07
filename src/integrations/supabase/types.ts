@@ -65,6 +65,48 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action: string
+          created_at: string
+          created_by: string
+          id: string
+          is_read: boolean
+          message: string
+          organisation_id: string
+          record_id: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_read?: boolean
+          message: string
+          organisation_id: string
+          record_id?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          organisation_id?: string
+          record_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       organisation_members: {
         Row: {
           created_at: string
@@ -131,6 +173,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          organisation_id: string
           standard_clause: string
           standard_description: string
           updated_at: string
@@ -138,6 +181,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          organisation_id: string
           standard_clause: string
           standard_description: string
           updated_at?: string
@@ -145,17 +189,38 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          organisation_id?: string
           standard_clause?: string
           standard_description?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "standards_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_org_notification: {
+        Args: {
+          p_organisation_id: string
+          p_type: string
+          p_action: string
+          p_title: string
+          p_message: string
+          p_record_id?: string
+          p_created_by?: string
+        }
+        Returns: string
+      }
       get_user_organisation: {
         Args: { user_id: string }
         Returns: string
