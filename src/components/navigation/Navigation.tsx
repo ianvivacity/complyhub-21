@@ -74,10 +74,10 @@ export const Navigation = () => {
         </ul>
       </div>
       
-      {/* Organization name at bottom */}
+      {/* Organization info at bottom */}
       <div className="px-4 py-4 border-t">
         <div className="text-sm font-medium text-gray-600">
-          {organisationMember?.organisations?.name || 'Organization Name'}
+          Organization
         </div>
       </div>
     </nav>
