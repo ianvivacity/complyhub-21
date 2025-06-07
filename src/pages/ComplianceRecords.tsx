@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -94,6 +93,22 @@ export const ComplianceRecords = () => {
     }
   };
 
+  const handleStatsCardClick = (filterType: string) => {
+    switch (filterType) {
+      case 'compliant':
+        setStatusFilter('compliant');
+        break;
+      case 'non-compliant':
+        setStatusFilter('non-compliant');
+        break;
+      case 'at-risk':
+        setStatusFilter('at-risk');
+        break;
+      default:
+        setStatusFilter('all');
+    }
+  };
+
   const stats = [
     { 
       label: 'Overall Compliance', 
@@ -102,28 +117,32 @@ export const ComplianceRecords = () => {
         '0%', 
       subtitle: `${complianceRecords.filter(r => r.compliance_status === 'Compliant').length} of ${complianceRecords.length} items compliant`, 
       icon: BarChart3,
-      iconColor: 'text-green-500' 
+      iconColor: 'text-green-500',
+      filterType: 'all'
     },
     { 
       label: 'Total Records', 
       value: complianceRecords.length.toString(), 
       subtitle: 'Compliance items tracked', 
       icon: Database,
-      iconColor: 'text-blue-500' 
+      iconColor: 'text-blue-500',
+      filterType: 'all'
     },
     { 
       label: 'Non-Compliant', 
       value: complianceRecords.filter(r => r.compliance_status === 'Non-Compliant').length.toString(), 
       subtitle: 'Items requiring attention', 
       icon: AlertTriangle,
-      iconColor: 'text-red-500' 
+      iconColor: 'text-red-500',
+      filterType: 'non-compliant'
     },
     { 
       label: 'At Risk', 
       value: complianceRecords.filter(r => r.compliance_status === 'At Risk').length.toString(), 
       subtitle: 'Items being addressed', 
       icon: Users,
-      iconColor: 'text-yellow-500' 
+      iconColor: 'text-yellow-500',
+      filterType: 'at-risk'
     }
   ];
 
@@ -178,7 +197,11 @@ export const ComplianceRecords = () => {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="bg-white">
+            <Card 
+              key={index} 
+              className="bg-white cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => handleStatsCardClick(stat.filterType)}
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
