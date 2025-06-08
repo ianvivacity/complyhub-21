@@ -6,10 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Trash2, Database, BarChart3, Users, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Database, BarChart3, Users, AlertTriangle, Eye } from 'lucide-react';
 import { AddComplianceDialog } from '@/components/compliance/AddComplianceDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ComplianceRecord {
   id: string;
@@ -21,6 +32,8 @@ interface ComplianceRecord {
   review_status: string;
   notes: string;
   created_at: string;
+  file_name?: string;
+  file_path?: string;
 }
 
 export const ComplianceRecords = () => {
@@ -198,10 +211,7 @@ export const ComplianceRecords = () => {
 
       {/* Compliance Records Section */}
       <div className="flex justify-between items-center mb-6">
-        <Button 
-          onClick={() => setIsAddDialogOpen(true)}
-          className="bg-[#7030a0] hover:bg-[#5e2680] text-white"
-        >
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Compliance Item
         </Button>
@@ -247,6 +257,7 @@ export const ComplianceRecords = () => {
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Responsible Person</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Next Review Date</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Review Status</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-500">Evidence</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>
                 </tr>
               </thead>
@@ -270,18 +281,41 @@ export const ComplianceRecords = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4">
+                      {record.file_name ? (
+                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">No file</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
                         <Button variant="ghost" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteRecord(record.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure you want to delete this compliance record?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the compliance record.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteRecord(record.id)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </td>
                   </tr>

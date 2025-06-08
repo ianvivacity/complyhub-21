@@ -83,18 +83,10 @@
   font-size: 22px;
 }
 
-.custom-primary {
-  background-color: #7030a0;
+.gradient-button {
+  background: linear-gradient(to right, #7130A0, #ED1878);
 }
 
-.custom-primary:hover {
-  background-color: #5e2680;
-}
-
-.custom-primary-border {
-  border-color: #7030a0;
-}
-
-.custom-primary-text {
-  color: #7030a0;
+.gradient-button:hover {
+  background: linear-gradient(to right, #5e2680, #cc1567);
 }

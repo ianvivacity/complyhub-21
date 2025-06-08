@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, LogOut, Bell } from 'lucide-react';
+import { Shield, LogOut } from 'lucide-react';
 
 export const Header = () => {
   const { user, organisationMember, signOut } = useAuth();
@@ -16,14 +16,14 @@ export const Header = () => {
   };
 
   const getRoleStyles = (role: string) => {
-    const baseStyles = "px-3 py-1 text-xs font-medium text-white rounded-full shadow-sm";
+    const baseStyles = "px-3 py-1 text-xs font-medium rounded-full shadow-sm";
     switch (role) {
       case 'admin':
-        return `${baseStyles} bg-[#ee1878]`;
+        return `${baseStyles} bg-purple-100 text-purple-800`;
       case 'member':
-        return `${baseStyles} bg-[#01b0f1]`;
+        return `${baseStyles} bg-blue-100 text-blue-800`;
       default:
-        return `${baseStyles} bg-gray-500`;
+        return `${baseStyles} bg-gray-100 text-gray-800`;
     }
   };
 
@@ -34,18 +34,12 @@ export const Header = () => {
           <div className="flex items-center">
             <Shield className="h-8 w-8 text-[#7030a0]" />
             <h1 className="ml-2 text-xl font-semibold text-gray-900">
-              ComplyHub <span className="text-sm font-normal">Powered By Vivacity Coaching and Consulting</span>
+              Compliance Management Tracker <span className="text-sm font-normal">Powered By Vivacity Coaching and Consulting</span>
             </h1>
           </div>
           
           {user && (
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  2
-                </span>
-              </Button>
               <span className="text-sm text-gray-700">
                 Welcome, {organisationMember?.full_name || user.email}
               </span>

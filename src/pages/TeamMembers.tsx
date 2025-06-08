@@ -2,12 +2,24 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Users, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TeamMember {
   id: string;
@@ -75,6 +87,40 @@ export const TeamMembers = () => {
       toast({
         title: "Error",
         description: "Failed to update member role",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteMember = async (memberId: string) => {
+    try {
+      // First delete from organisation_members
+      const { error: memberError } = await supabase
+        .from('organisation_members')
+        .delete()
+        .eq('id', memberId);
+
+      if (memberError) throw memberError;
+
+      // Then delete from auth.users (this requires service role)
+      const { error: authError } = await supabase.auth.admin.deleteUser(memberId);
+      
+      if (authError) {
+        console.warn('Could not delete user from auth:', authError);
+        // Don't throw here as the org member was already deleted
+      }
+
+      toast({
+        title: "Success",
+        description: "Team member deleted successfully",
+      });
+
+      fetchTeamMembers();
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete team member",
         variant: "destructive",
       });
     }
@@ -178,6 +224,28 @@ export const TeamMembers = () => {
                               <SelectItem value="member">Member</SelectItem>
                             </SelectContent>
                           </Select>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to delete this user?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the user account and remove them from the organization.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteMember(member.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </td>
                     )}

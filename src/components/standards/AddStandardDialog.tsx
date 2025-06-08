@@ -1,28 +1,63 @@
 
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AddStandardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
-export const AddStandardDialog = ({ open, onOpenChange }: AddStandardDialogProps) => {
+export const AddStandardDialog = ({ open, onOpenChange, onSuccess }: AddStandardDialogProps) => {
+  const { organisationMember } = useAuth();
+  const { toast } = useToast();
   const [standardClause, setStandardClause] = useState('');
   const [standardDescription, setStandardDescription] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Creating standard:', { standardClause, standardDescription });
-    onOpenChange(false);
-    setStandardClause('');
-    setStandardDescription('');
+    if (!organisationMember?.organisation_id) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('standards')
+        .insert({
+          standard_clause: standardClause,
+          standard_description: standardDescription,
+          organisation_id: organisationMember.organisation_id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Standard created successfully",
+      });
+
+      onSuccess();
+      onOpenChange(false);
+      setStandardClause('');
+      setStandardDescription('');
+    } catch (error) {
+      console.error('Error creating standard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create standard",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,9 +111,9 @@ export const AddStandardDialog = ({ open, onOpenChange }: AddStandardDialogProps
             </Button>
             <Button
               type="submit"
-              className="bg-[#7030a0] hover:bg-[#5e2680] text-white"
+              disabled={loading}
             >
-              Create Standard
+              {loading ? 'Creating...' : 'Create Standard'}
             </Button>
           </div>
         </form>
