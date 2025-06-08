@@ -67,6 +67,7 @@ export const ComplianceRecords = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched records:', data); // Debug log
       setComplianceRecords(data || []);
     } catch (error) {
       console.error('Error fetching compliance records:', error);
@@ -116,11 +117,16 @@ export const ComplianceRecords = () => {
 
   const handleViewFile = async (filePath: string, fileName: string) => {
     try {
+      console.log('Downloading file:', filePath, fileName); // Debug log
+      
       const { data, error } = await supabase.storage
         .from('compliance-evidence')
         .download(filePath);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Download error:', error);
+        throw error;
+      }
 
       // Create a blob URL and download the file
       const url = URL.createObjectURL(data);
@@ -131,6 +137,11 @@ export const ComplianceRecords = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Success",
+        description: "File downloaded successfully",
+      });
     } catch (error) {
       console.error('Error downloading file:', error);
       toast({
@@ -296,81 +307,84 @@ export const ComplianceRecords = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords.map((record) => (
-                  <tr key={record.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{record.compliance_item}</td>
-                    <td className="py-3 px-4 text-gray-600">{record.standard_clause}</td>
-                    <td className="py-3 px-4">
-                      <span className={getStatusBadge(record.compliance_status)}>
-                        {record.compliance_status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{record.responsible_person}</td>
-                    <td className="py-3 px-4 text-gray-600">
-                      {record.next_review_date ? new Date(record.next_review_date).toLocaleDateString() : 'Not set'}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        {record.review_status || 'Scheduled'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {record.file_name && record.file_path ? (
-                        <div className="space-y-1">
-                          {record.file_name.split(', ').map((fileName, index) => {
-                            const filePath = record.file_path?.split(', ')[index];
-                            return (
-                              <Button
-                                key={index}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => filePath && handleViewFile(filePath, fileName)}
-                                className="text-blue-600 hover:text-blue-700 p-1 h-auto"
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View File
+                {filteredRecords.map((record) => {
+                  console.log('Record files:', record.file_name, record.file_path); // Debug log
+                  return (
+                    <tr key={record.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-medium">{record.compliance_item}</td>
+                      <td className="py-3 px-4 text-gray-600">{record.standard_clause}</td>
+                      <td className="py-3 px-4">
+                        <span className={getStatusBadge(record.compliance_status)}>
+                          {record.compliance_status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-gray-600">{record.responsible_person}</td>
+                      <td className="py-3 px-4 text-gray-600">
+                        {record.next_review_date ? new Date(record.next_review_date).toLocaleDateString() : 'Not set'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {record.review_status || 'Scheduled'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        {record.file_name && record.file_path ? (
+                          <div className="space-y-1">
+                            {record.file_name.split(', ').map((fileName, index) => {
+                              const filePath = record.file_path?.split(', ')[index];
+                              return (
+                                <Button
+                                  key={index}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => filePath && handleViewFile(filePath, fileName)}
+                                  className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View File
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-sm">No file</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditRecord(record)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                            );
-                          })}
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to delete this compliance record?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the compliance record.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteRecord(record.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
-                      ) : (
-                        <span className="text-gray-400 text-sm">No file</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditRecord(record)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure you want to delete this compliance record?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the compliance record.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteRecord(record.id)}>
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

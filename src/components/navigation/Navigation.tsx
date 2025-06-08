@@ -48,20 +48,19 @@ export const Navigation = () => {
       href: '/messages',
       icon: MessageSquare,
       adminOnly: false
+    },
+    {
+      name: 'General Settings',
+      href: '/settings',
+      icon: Settings,
+      adminOnly: true
     }
   ];
 
-  const settingsItem = {
-    name: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    adminOnly: true
-  };
-
-  const filteredMainNavItems = mainNavItems;
+  const filteredMainNavItems = mainNavItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
-    <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300" style={{ height: '94vh' }}>
+    <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300" style={{ height: 'auto' }}>
       {/* Logo */}
       <div className="p-4 border-b flex items-center">
         <div className="flex items-center space-x-3 flex-1">
@@ -100,26 +99,6 @@ export const Navigation = () => {
           })}
         </ul>
       </div>
-      
-      {/* Settings at bottom - this will always stick to bottom */}
-      {(!settingsItem.adminOnly || isAdmin) && (
-        <div className="px-4 py-4 border-t mt-auto">
-          <Link
-            to={settingsItem.href}
-            className={cn(
-              "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
-              "py-3",
-              location.pathname === settingsItem.href
-                ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            )}
-            style={{ fontSize: '15px' }}
-          >
-            <Settings className="h-5 w-5 mr-3" />
-            <span>{settingsItem.name}</span>
-          </Link>
-        </div>
-      )}
     </nav>
   );
 };
