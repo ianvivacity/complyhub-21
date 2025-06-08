@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -102,6 +101,33 @@ export const ComplianceRecords = () => {
       toast({
         title: "Error",
         description: "Failed to delete compliance record",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewFile = async (filePath: string, fileName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('compliance-evidence')
+        .download(filePath);
+
+      if (error) throw error;
+
+      // Create a blob URL and download the file
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download file",
         variant: "destructive",
       });
     }
@@ -281,11 +307,24 @@ export const ComplianceRecords = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      {record.file_name ? (
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
+                      {record.file_name && record.file_path ? (
+                        <div className="space-y-1">
+                          {record.file_name.split(', ').map((fileName, index) => {
+                            const filePath = record.file_path?.split(', ')[index];
+                            return (
+                              <Button
+                                key={index}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => filePath && handleViewFile(filePath, fileName)}
+                                className="text-blue-600 hover:text-blue-700 p-1 h-auto"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View File
+                              </Button>
+                            );
+                          })}
+                        </div>
                       ) : (
                         <span className="text-gray-400 text-sm">No file</span>
                       )}

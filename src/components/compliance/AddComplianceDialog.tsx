@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { FileUpload } from './FileUpload';
 
 interface AddComplianceDialogProps {
   open: boolean;
@@ -36,7 +37,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
   const [standardClause, setStandardClause] = useState('');
   const [notes, setNotes] = useState('');
   const [nextReviewDate, setNextReviewDate] = useState<Date>();
-  const [evidence, setEvidence] = useState<FileList | null>(null);
+  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
   const [standards, setStandards] = useState<any[]>([]);
@@ -90,13 +91,34 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
     fetchStandards();
   }, []);
 
+  const uploadFiles = async (files: File[], recordId: string) => {
+    const uploadPromises = files.map(async (file) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${recordId}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('compliance-evidence')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        throw uploadError;
+      }
+
+      return fileName;
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!organisationMember?.organisation_id) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      // First, create the compliance record
+      const { data: recordData, error: recordError } = await supabase
         .from('compliance_records')
         .insert({
           compliance_item: complianceItem,
@@ -106,9 +128,36 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
           notes,
           next_review_date: nextReviewDate ? format(nextReviewDate, 'yyyy-MM-dd') : null,
           organisation_id: organisationMember.organisation_id
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (recordError) throw recordError;
+
+      // Upload files if any
+      if (evidenceFiles.length > 0) {
+        try {
+          const filePaths = await uploadFiles(evidenceFiles, recordData.id);
+          
+          // Update the record with file information
+          const { error: updateError } = await supabase
+            .from('compliance_records')
+            .update({
+              file_name: evidenceFiles.map(f => f.name).join(', '),
+              file_path: filePaths.join(', ')
+            })
+            .eq('id', recordData.id);
+
+          if (updateError) throw updateError;
+        } catch (uploadError) {
+          console.error('Error uploading files:', uploadError);
+          toast({
+            title: "Warning",
+            description: "Record created but some files failed to upload",
+            variant: "destructive",
+          });
+        }
+      }
 
       toast({
         title: "Success",
@@ -125,7 +174,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
       setStandardClause('');
       setNotes('');
       setNextReviewDate(undefined);
-      setEvidence(null);
+      setEvidenceFiles([]);
     } catch (error) {
       console.error('Error creating compliance record:', error);
       toast({
@@ -253,16 +302,10 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
             />
           </div>
 
-          <div>
-            <Label htmlFor="evidence">Upload Evidence (Multiple files allowed)</Label>
-            <Input
-              id="evidence"
-              type="file"
-              multiple
-              onChange={(e) => setEvidence(e.target.files)}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#7030a0] file:text-white hover:file:bg-[#5e2680]"
-            />
-          </div>
+          <FileUpload 
+            files={evidenceFiles}
+            onFilesChange={setEvidenceFiles}
+          />
           
           <div className="flex justify-end space-x-2 pt-4">
             <Button

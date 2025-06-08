@@ -10,17 +10,12 @@ import {
   Settings,
   BarChart3,
   MessageSquare,
-  ChevronLeft,
-  ChevronRight,
   Shield
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useSidebar } from '@/components/ui/sidebar';
 
 export const Navigation = () => {
   const { organisationMember } = useAuth();
   const location = useLocation();
-  const { collapsed, setCollapsed } = useSidebar();
   const isAdmin = organisationMember?.role === 'admin';
 
   const mainNavItems = [
@@ -66,37 +61,15 @@ export const Navigation = () => {
   const filteredMainNavItems = mainNavItems;
 
   return (
-    <nav className={cn(
-      "bg-white shadow-sm border-r h-screen flex flex-col transition-all duration-300",
-      collapsed ? "w-16" : "w-64"
-    )}>
-      {/* Toggle button and logo */}
-      <div className="p-4 border-b flex items-center justify-between">
-        {!collapsed && (
-          <div className="flex items-center space-x-3 flex-1">
-            <Shield className="h-6 w-6 text-[#7030a0]" />
-            <h1 className="text-lg font-semibold text-gray-900">
-              ComplyHub
-            </h1>
-          </div>
-        )}
-        {collapsed && (
-          <div className="flex items-center justify-center w-full">
-            <Shield className="h-5 w-5 text-[#7030a0]" />
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex-shrink-0"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-5 w-5" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </Button>
+    <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300" style={{ height: '94vh' }}>
+      {/* Logo */}
+      <div className="p-4 border-b flex items-center">
+        <div className="flex items-center space-x-3 flex-1">
+          <Shield className="h-6 w-6 text-[#7030a0]" />
+          <h1 className="text-lg font-semibold text-gray-900">
+            ComplyHub
+          </h1>
+        </div>
       </div>
 
       {/* Main navigation */}
@@ -111,18 +84,16 @@ export const Navigation = () => {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors border-0",
-                    "text-base py-3",
+                    "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
+                    "py-3",
                     isActive
                       ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
+                  style={{ fontSize: '15px' }}
                 >
-                  <Icon className={cn(
-                    collapsed ? "h-6 w-6" : "h-5 w-5", 
-                    !collapsed && "mr-3"
-                  )} />
-                  {!collapsed && <span>{item.name}</span>}
+                  <Icon className="h-5 w-5 mr-3" />
+                  <span>{item.name}</span>
                 </Link>
               </li>
             );
@@ -136,18 +107,16 @@ export const Navigation = () => {
           <Link
             to={settingsItem.href}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors border-0",
-              "text-base py-3",
+              "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
+              "py-3",
               location.pathname === settingsItem.href
                 ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
+            style={{ fontSize: '15px' }}
           >
-            <Settings className={cn(
-              collapsed ? "h-6 w-6" : "h-5 w-5", 
-              !collapsed && "mr-3"
-            )} />
-            {!collapsed && <span>{settingsItem.name}</span>}
+            <Settings className="h-5 w-5 mr-3" />
+            <span>{settingsItem.name}</span>
           </Link>
         </div>
       )}

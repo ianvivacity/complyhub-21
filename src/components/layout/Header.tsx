@@ -36,7 +36,12 @@ export const Header = () => {
               href="https://www.vivacity.com.au/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm transition-colors hover:text-[#ED1878]"
+              style={{
+                fontWeight: 600,
+                fontSize: '14px',
+                color: 'black'
+              }}
             >
               Powered By Vivacity Coaching And Consulting
             </a>

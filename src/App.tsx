@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { Header } from "@/components/layout/Header";
 import { Navigation } from "@/components/navigation/Navigation";
@@ -31,48 +30,46 @@ const App = () => (
             
             {/* Protected routes */}
             <Route path="/*" element={
-              <SidebarProvider>
-                <div className="min-h-screen bg-gray-50 flex flex-col w-full">
-                  <ProtectedRoute>
-                    <Header />
-                    <div className="flex flex-1">
-                      <Navigation />
-                      <div className="flex-1 overflow-auto">
-                        <Routes>
-                          <Route path="/" element={<ComplianceRecords />} />
-                          <Route 
-                            path="/standards" 
-                            element={<Standards />} 
-                          />
-                          <Route 
-                            path="/team" 
-                            element={<TeamMembers />} 
-                          />
-                          <Route 
-                            path="/analytics" 
-                            element={<Analytics />} 
-                          />
-                          <Route 
-                            path="/messages" 
-                            element={<Messages />} 
-                          />
-                          <Route 
-                            path="/settings" 
-                            element={
-                              <ProtectedRoute adminOnly>
-                                <div className="p-6">
-                                  <h1 className="text-3xl font-bold">Settings</h1>
-                                  <p className="text-gray-600 mt-2">Configure system settings (Admin only).</p>
-                                </div>
-                              </ProtectedRoute>
-                            } 
-                          />
-                        </Routes>
-                      </div>
+              <div className="min-h-screen bg-gray-50 flex flex-col w-full">
+                <ProtectedRoute>
+                  <Header />
+                  <div className="flex flex-1">
+                    <Navigation />
+                    <div className="flex-1 overflow-auto">
+                      <Routes>
+                        <Route path="/" element={<ComplianceRecords />} />
+                        <Route 
+                          path="/standards" 
+                          element={<Standards />} 
+                        />
+                        <Route 
+                          path="/team" 
+                          element={<TeamMembers />} 
+                        />
+                        <Route 
+                          path="/analytics" 
+                          element={<Analytics />} 
+                        />
+                        <Route 
+                          path="/messages" 
+                          element={<Messages />} 
+                        />
+                        <Route 
+                          path="/settings" 
+                          element={
+                            <ProtectedRoute adminOnly>
+                              <div className="p-6">
+                                <h1 className="text-3xl font-bold">Settings</h1>
+                                <p className="text-gray-600 mt-2">Configure system settings (Admin only).</p>
+                              </div>
+                            </ProtectedRoute>
+                          } 
+                        />
+                      </Routes>
                     </div>
-                  </ProtectedRoute>
-                </div>
-              </SidebarProvider>
+                  </div>
+                </ProtectedRoute>
+              </div>
             } />
           </Routes>
         </BrowserRouter>
