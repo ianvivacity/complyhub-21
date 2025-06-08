@@ -38,8 +38,8 @@ export const Header = () => {
               rel="noopener noreferrer"
               className="text-sm transition-colors hover:text-[#ED1878]"
               style={{
-                fontWeight: 600,
-                fontSize: '14px',
+                fontWeight: 500,
+                fontSize: '15px',
                 color: 'black'
               }}
             >

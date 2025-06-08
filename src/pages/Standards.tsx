@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Search, Edit, Trash2, FileText } from 'lucide-react';
 import { AddStandardDialog } from '@/components/standards/AddStandardDialog';
+import { EditStandardDialog } from '@/components/standards/EditStandardDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -32,6 +33,8 @@ export const Standards = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingStandard, setEditingStandard] = useState<Standard | null>(null);
   const [standards, setStandards] = useState<Standard[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +65,11 @@ export const Standards = () => {
   useEffect(() => {
     fetchStandards();
   }, [organisationMember]);
+
+  const handleEditStandard = (standard: Standard) => {
+    setEditingStandard(standard);
+    setIsEditDialogOpen(true);
+  };
 
   const handleDeleteStandard = async (id: string) => {
     try {
@@ -148,7 +156,11 @@ export const Standards = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditStandard(standard)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
@@ -194,6 +206,13 @@ export const Standards = () => {
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen}
         onSuccess={fetchStandards}
+      />
+
+      <EditStandardDialog 
+        open={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={fetchStandards}
+        standard={editingStandard}
       />
     </div>
   );

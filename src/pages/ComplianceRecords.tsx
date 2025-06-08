@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Edit, Trash2, Database, BarChart3, Users, AlertTriangle, Eye } from 'lucide-react';
 import { AddComplianceDialog } from '@/components/compliance/AddComplianceDialog';
+import { EditComplianceDialog } from '@/components/compliance/EditComplianceDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -42,6 +43,8 @@ export const ComplianceRecords = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ComplianceRecord | null>(null);
   const [complianceRecords, setComplianceRecords] = useState<ComplianceRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,6 +83,11 @@ export const ComplianceRecords = () => {
   useEffect(() => {
     fetchComplianceRecords();
   }, [organisationMember]);
+
+  const handleEditRecord = (record: ComplianceRecord) => {
+    setEditingRecord(record);
+    setIsEditDialogOpen(true);
+  };
 
   const handleDeleteRecord = async (id: string) => {
     try {
@@ -331,7 +339,11 @@ export const ComplianceRecords = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditRecord(record)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
@@ -377,6 +389,13 @@ export const ComplianceRecords = () => {
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen}
         onSuccess={fetchComplianceRecords}
+      />
+
+      <EditComplianceDialog 
+        open={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={fetchComplianceRecords}
+        record={editingRecord}
       />
     </div>
   );

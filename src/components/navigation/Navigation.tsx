@@ -101,9 +101,9 @@ export const Navigation = () => {
         </ul>
       </div>
       
-      {/* Settings at bottom */}
+      {/* Settings at bottom - this will always stick to bottom */}
       {(!settingsItem.adminOnly || isAdmin) && (
-        <div className="px-4 py-4 border-t">
+        <div className="px-4 py-4 border-t mt-auto">
           <Link
             to={settingsItem.href}
             className={cn(
