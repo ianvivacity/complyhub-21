@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export const Header = () => {
   const { user, organisationMember, signOut } = useAuth();
@@ -32,7 +32,14 @@ export const Header = () => {
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Shield className="h-8 w-8 text-[#7030a0]" />
+            <a 
+              href="https://www.vivacity.com.au/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Powered By Vivacity Coaching And Consulting
+            </a>
           </div>
           
           {user && (

@@ -11,7 +11,8 @@ import {
   BarChart3,
   MessageSquare,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -72,9 +73,17 @@ export const Navigation = () => {
       {/* Toggle button and logo */}
       <div className="p-4 border-b flex items-center justify-between">
         {!collapsed && (
-          <h1 className="text-lg font-semibold text-gray-900 flex-1">
-            ComplyHub
-          </h1>
+          <div className="flex items-center space-x-3 flex-1">
+            <Shield className="h-6 w-6 text-[#7030a0]" />
+            <h1 className="text-lg font-semibold text-gray-900">
+              ComplyHub
+            </h1>
+          </div>
+        )}
+        {collapsed && (
+          <div className="flex items-center justify-center w-full">
+            <Shield className="h-5 w-5 text-[#7030a0]" />
+          </div>
         )}
         <Button
           variant="ghost"
@@ -83,7 +92,7 @@ export const Navigation = () => {
           className="flex-shrink-0"
         >
           {collapsed ? (
-            <ChevronRight className={cn("h-4 w-4", collapsed && "h-5 w-5")} />
+            <ChevronRight className="h-5 w-5" />
           ) : (
             <ChevronLeft className="h-4 w-4" />
           )}
@@ -105,11 +114,14 @@ export const Navigation = () => {
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors border-0",
                     "text-base py-3",
                     isActive
-                      ? "bg-purple-100 text-purple-700"
+                      ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
                 >
-                  <Icon className={cn("h-5 w-5", !collapsed && "mr-3")} />
+                  <Icon className={cn(
+                    collapsed ? "h-6 w-6" : "h-5 w-5", 
+                    !collapsed && "mr-3"
+                  )} />
                   {!collapsed && <span>{item.name}</span>}
                 </Link>
               </li>
@@ -127,11 +139,14 @@ export const Navigation = () => {
               "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors border-0",
               "text-base py-3",
               location.pathname === settingsItem.href
-                ? "bg-purple-100 text-purple-700"
+                ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
           >
-            <Settings className={cn("h-5 w-5", !collapsed && "mr-3")} />
+            <Settings className={cn(
+              collapsed ? "h-6 w-6" : "h-5 w-5", 
+              !collapsed && "mr-3"
+            )} />
             {!collapsed && <span>{settingsItem.name}</span>}
           </Link>
         </div>
