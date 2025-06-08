@@ -201,6 +201,9 @@ export type Database = {
       }
       organisations: {
         Row: {
+          branding_color: string | null
+          contact_email: string | null
+          contact_number: string | null
           created_at: string
           id: string
           name: string
@@ -208,6 +211,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          branding_color?: string | null
+          contact_email?: string | null
+          contact_number?: string | null
           created_at?: string
           id?: string
           name: string
@@ -215,6 +221,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          branding_color?: string | null
+          contact_email?: string | null
+          contact_number?: string | null
           created_at?: string
           id?: string
           name?: string

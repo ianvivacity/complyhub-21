@@ -11,7 +11,8 @@ import {
   BarChart3,
   MessageSquare,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -20,7 +21,6 @@ export const Navigation = () => {
   const { organisationMember } = useAuth();
   const location = useLocation();
   const { collapsed, setCollapsed } = useSidebar();
-  const isAdmin = organisationMember?.role === 'admin';
 
   const navItems = [
     {
@@ -59,26 +59,31 @@ export const Navigation = () => {
       name: 'Settings',
       href: '/settings',
       icon: Settings,
-      adminOnly: true
+      adminOnly: false
     }
   ];
 
-  const filteredNavItems = navItems.filter(item => 
-    !item.adminOnly || isAdmin
-  );
-
   return (
     <nav className={cn(
-      "bg-white shadow-sm border-r h-full flex flex-col transition-all duration-300",
+      "bg-white shadow-sm border-r flex flex-col transition-all duration-300",
       collapsed ? "w-16" : "w-64"
-    )}>
-      {/* Toggle button */}
-      <div className="p-4 border-b">
+    )} style={{ height: '93vh' }}>
+      {/* Header with logo and toggle */}
+      <div className="p-4 border-b flex items-center justify-between">
+        {!collapsed && (
+          <div className="flex items-center">
+            <Shield className="h-6 w-6 text-[#7030a0] mr-2" />
+            <h1 className="text-lg font-semibold text-gray-900">ComplyHub</h1>
+          </div>
+        )}
+        {collapsed && (
+          <Shield className="h-6 w-6 text-[#7030a0] mx-auto" />
+        )}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex justify-center"
+          className="p-1 h-8 w-8"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -86,19 +91,21 @@ export const Navigation = () => {
 
       <div className="px-4 py-6 flex-1">
         <ul className="space-y-2">
-          {filteredNavItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.href;
             
             return (
               <li key={item.name}>
                 {item.underDevelopment ? (
-                  <div
+                  <Link
+                    to={item.href}
                     className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-md",
-                      "text-gray-400 cursor-not-allowed"
+                      "flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors border-0",
+                      "text-gray-400 hover:bg-gray-50 hover:text-gray-600",
+                      "text-base"
                     )}
-                    title="Under Development"
+                    style={{ fontSize: '16px', paddingTop: '10px', paddingBottom: '10px' }}
                   >
                     <Icon className={cn("h-5 w-5", !collapsed && "mr-3")} />
                     {!collapsed && (
@@ -107,17 +114,18 @@ export const Navigation = () => {
                         <div className="text-xs text-gray-400">Under Development</div>
                       </div>
                     )}
-                  </div>
+                  </Link>
                 ) : (
                   <Link
                     to={item.href}
                     className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors border-0",
-                      "text-base py-3",
+                      "flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors border-0",
+                      "text-base",
                       isActive
                         ? "bg-gradient-to-r from-[#7130a0] to-[#ed1878] text-white"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
+                    style={{ fontSize: '16px', paddingTop: '10px', paddingBottom: '10px', border: '0px' }}
                   >
                     <Icon className={cn("h-5 w-5", !collapsed && "mr-3")} />
                     {!collapsed && <span>{item.name}</span>}
@@ -128,15 +136,6 @@ export const Navigation = () => {
           })}
         </ul>
       </div>
-      
-      {/* Organization info at bottom */}
-      {!collapsed && (
-        <div className="px-4 py-4 border-t">
-          <div className="text-sm font-medium text-gray-600">
-            Organization
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
