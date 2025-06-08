@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { Shield, LogOut } from 'lucide-react';
 
 export const Header = () => {
   const { user, organisationMember, signOut } = useAuth();
@@ -19,7 +19,7 @@ export const Header = () => {
     const baseStyles = "px-3 py-1 text-xs font-medium rounded-full shadow-sm";
     switch (role) {
       case 'admin':
-        return `${baseStyles} bg-gradient-to-r from-[#7130a0] to-[#ed1878] text-white`;
+        return `${baseStyles} bg-purple-100 text-purple-800`;
       case 'member':
         return `${baseStyles} bg-blue-100 text-blue-800`;
       default:
@@ -30,7 +30,14 @@ export const Header = () => {
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-end items-center h-16">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <Shield className="h-8 w-8 text-[#7030a0]" />
+            <h1 className="ml-2 text-xl font-semibold text-gray-900">
+              Compliance Management Tracker <span className="text-sm font-normal">Powered By Vivacity Coaching and Consulting</span>
+            </h1>
+          </div>
+          
           {user && (
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">

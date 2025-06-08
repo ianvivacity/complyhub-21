@@ -12,9 +12,6 @@ import { Navigation } from "@/components/navigation/Navigation";
 import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
 import { TeamMembers } from "@/pages/TeamMembers";
-import { Settings } from "@/pages/Settings";
-import { Analytics } from "@/pages/Analytics";
-import { Messages } from "@/pages/Messages";
 import { AcceptInvitation } from "@/pages/AcceptInvitation";
 
 const queryClient = new QueryClient();
@@ -41,11 +38,25 @@ const App = () => (
                       <div className="flex-1 overflow-auto">
                         <Routes>
                           <Route path="/" element={<ComplianceRecords />} />
-                          <Route path="/standards" element={<Standards />} />
-                          <Route path="/team" element={<TeamMembers />} />
-                          <Route path="/analytics" element={<Analytics />} />
-                          <Route path="/messages" element={<Messages />} />
-                          <Route path="/settings" element={<Settings />} />
+                          <Route 
+                            path="/standards" 
+                            element={<Standards />} 
+                          />
+                          <Route 
+                            path="/team" 
+                            element={<TeamMembers />} 
+                          />
+                          <Route 
+                            path="/settings" 
+                            element={
+                              <ProtectedRoute adminOnly>
+                                <div className="p-6">
+                                  <h1 className="text-3xl font-bold">Settings</h1>
+                                  <p className="text-gray-600 mt-2">Configure system settings (Admin only).</p>
+                                </div>
+                              </ProtectedRoute>
+                            } 
+                          />
                         </Routes>
                       </div>
                     </div>
