@@ -39,6 +39,31 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
   const isAdmin = organisationMember?.role === 'admin';
   const memberName = organisationMember?.full_name || organisationMember?.email || '';
 
+  const createStorageBucket = async () => {
+    try {
+      // Check if bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === 'compliance-evidence');
+      
+      if (!bucketExists) {
+        console.log('Creating compliance-evidence bucket...');
+        const { error } = await supabase.storage.createBucket('compliance-evidence', {
+          public: true,
+          allowedMimeTypes: ['image/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        });
+        
+        if (error) {
+          console.error('Error creating bucket:', error);
+          throw error;
+        }
+        console.log('Bucket created successfully');
+      }
+    } catch (error) {
+      console.error('Error with storage bucket:', error);
+      // Don't throw here, continue with upload attempt
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!organisationMember?.organisation_id) {
@@ -52,27 +77,36 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
 
     setLoading(true);
     try {
+      // Ensure storage bucket exists
+      await createStorageBucket();
+
       let fileNames: string[] = [];
       let filePaths: string[] = [];
 
       // Upload files if any
       if (files.length > 0) {
+        console.log('Uploading files:', files.length);
+        
         for (const file of files) {
           const fileExt = file.name.split('.').pop();
           const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
           const filePath = `${organisationMember.organisation_id}/${fileName}`;
 
-          console.log('Uploading file:', filePath);
+          console.log('Uploading file to path:', filePath);
 
-          const { error: uploadError } = await supabase.storage
+          const { data, error: uploadError } = await supabase.storage
             .from('compliance-evidence')
-            .upload(filePath, file);
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
           if (uploadError) {
             console.error('Upload error:', uploadError);
-            throw new Error(`Failed to upload file: ${uploadError.message}`);
+            throw new Error(`Failed to upload file ${file.name}: ${uploadError.message}`);
           }
 
+          console.log('Upload successful:', data);
           fileNames.push(file.name);
           filePaths.push(filePath);
         }
@@ -85,19 +119,12 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
         throw new Error('Responsible person is required');
       }
 
-      console.log('Inserting compliance record:', {
-        compliance_item: complianceItem,
-        standard_clause: standardClause,
-        compliance_status: complianceStatus,
-        responsible_person: finalResponsiblePerson,
-        next_review_date: nextReviewDate?.toISOString().split('T')[0] || null,
-        notes: notes || null,
-        organisation_id: organisationMember.organisation_id,
-        file_name: fileNames.length > 0 ? fileNames.join(', ') : null,
-        file_path: filePaths.length > 0 ? filePaths.join(', ') : null,
+      console.log('Inserting compliance record with files:', {
+        file_names: fileNames,
+        file_paths: filePaths
       });
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('compliance_records')
         .insert({
           compliance_item: complianceItem,
@@ -109,16 +136,19 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
           organisation_id: organisationMember.organisation_id,
           file_name: fileNames.length > 0 ? fileNames.join(', ') : null,
           file_path: filePaths.length > 0 ? filePaths.join(', ') : null,
-        });
+        })
+        .select();
 
       if (error) {
         console.error('Database error:', error);
         throw new Error(`Database error: ${error.message}`);
       }
 
+      console.log('Record inserted successfully:', data);
+
       toast({
         title: "Success",
-        description: "Compliance record added successfully",
+        description: `Compliance record added successfully${files.length > 0 ? ` with ${files.length} file(s)` : ''}`,
       });
 
       onSuccess();

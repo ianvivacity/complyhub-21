@@ -67,7 +67,7 @@ export const ComplianceRecords = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      console.log('Fetched records:', data); // Debug log
+      console.log('Fetched records:', data);
       setComplianceRecords(data || []);
     } catch (error) {
       console.error('Error fetching compliance records:', error);
@@ -117,7 +117,7 @@ export const ComplianceRecords = () => {
 
   const handleViewFile = async (filePath: string, fileName: string) => {
     try {
-      console.log('Downloading file:', filePath, fileName); // Debug log
+      console.log('Downloading file:', filePath, fileName);
       
       const { data, error } = await supabase.storage
         .from('compliance-evidence')
@@ -308,7 +308,9 @@ export const ComplianceRecords = () => {
               </thead>
               <tbody>
                 {filteredRecords.map((record) => {
-                  console.log('Record files:', record.file_name, record.file_path); // Debug log
+                  const fileNames = record.file_name ? record.file_name.split(', ') : [];
+                  const filePaths = record.file_path ? record.file_path.split(', ') : [];
+                  
                   return (
                     <tr key={record.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 font-medium">{record.compliance_item}</td>
@@ -328,26 +330,28 @@ export const ComplianceRecords = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        {record.file_name && record.file_path ? (
+                        {fileNames.length > 0 && filePaths.length > 0 ? (
                           <div className="space-y-1">
-                            {record.file_name.split(', ').map((fileName, index) => {
-                              const filePath = record.file_path?.split(', ')[index];
+                            {fileNames.map((fileName, index) => {
+                              const filePath = filePaths[index];
+                              if (!filePath) return null;
+                              
                               return (
                                 <Button
                                   key={index}
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => filePath && handleViewFile(filePath, fileName)}
-                                  className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                                  onClick={() => handleViewFile(filePath, fileName)}
+                                  className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300 mr-1 mb-1"
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
-                                  View File
+                                  {fileName.length > 20 ? fileName.substring(0, 20) + '...' : fileName}
                                 </Button>
                               );
                             })}
                           </div>
                         ) : (
-                          <span className="text-gray-400 text-sm">No file</span>
+                          <span className="text-gray-400 text-sm">No files</span>
                         )}
                       </td>
                       <td className="py-3 px-4">
