@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FileUpload } from './FileUpload';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 
 interface AddComplianceDialogProps {
   open: boolean;
@@ -24,6 +26,7 @@ interface AddComplianceDialogProps {
 export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddComplianceDialogProps) => {
   const { organisationMember } = useAuth();
   const { toast } = useToast();
+  const { teamMembers } = useTeamMembers();
   const [complianceItem, setComplianceItem] = useState('');
   const [standardClause, setStandardClause] = useState('');
   const [complianceStatus, setComplianceStatus] = useState('');
@@ -33,9 +36,19 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const isAdmin = organisationMember?.role === 'admin';
+  const memberName = organisationMember?.full_name || organisationMember?.email || '';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organisationMember?.organisation_id) return;
+    if (!organisationMember?.organisation_id) {
+      toast({
+        title: "Error",
+        description: "Organisation not found",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -46,8 +59,10 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
       if (files.length > 0) {
         for (const file of files) {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${Math.random()}.${fileExt}`;
+          const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
           const filePath = `${organisationMember.organisation_id}/${fileName}`;
+
+          console.log('Uploading file:', filePath);
 
           const { error: uploadError } = await supabase.storage
             .from('compliance-evidence')
@@ -55,7 +70,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
 
           if (uploadError) {
             console.error('Upload error:', uploadError);
-            throw uploadError;
+            throw new Error(`Failed to upload file: ${uploadError.message}`);
           }
 
           fileNames.push(file.name);
@@ -63,13 +78,32 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
         }
       }
 
+      // For members, use their name; for admins, use selected person
+      const finalResponsiblePerson = isAdmin ? responsiblePerson : memberName;
+
+      if (!finalResponsiblePerson) {
+        throw new Error('Responsible person is required');
+      }
+
+      console.log('Inserting compliance record:', {
+        compliance_item: complianceItem,
+        standard_clause: standardClause,
+        compliance_status: complianceStatus,
+        responsible_person: finalResponsiblePerson,
+        next_review_date: nextReviewDate?.toISOString().split('T')[0] || null,
+        notes: notes || null,
+        organisation_id: organisationMember.organisation_id,
+        file_name: fileNames.length > 0 ? fileNames.join(', ') : null,
+        file_path: filePaths.length > 0 ? filePaths.join(', ') : null,
+      });
+
       const { error } = await supabase
         .from('compliance_records')
         .insert({
           compliance_item: complianceItem,
           standard_clause: standardClause,
           compliance_status: complianceStatus,
-          responsible_person: responsiblePerson,
+          responsible_person: finalResponsiblePerson,
           next_review_date: nextReviewDate?.toISOString().split('T')[0] || null,
           notes: notes || null,
           organisation_id: organisationMember.organisation_id,
@@ -79,7 +113,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
 
       if (error) {
         console.error('Database error:', error);
-        throw error;
+        throw new Error(`Database error: ${error.message}`);
       }
 
       toast({
@@ -94,7 +128,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
       console.error('Error adding compliance record:', error);
       toast({
         title: "Error",
-        description: "Failed to add compliance record",
+        description: error instanceof Error ? error.message : "Failed to add compliance record",
         variant: "destructive",
       });
     } finally {
@@ -168,13 +202,28 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
           
           <div>
             <Label htmlFor="responsiblePerson">Responsible Person</Label>
-            <Input
-              id="responsiblePerson"
-              placeholder="Enter responsible person"
-              value={responsiblePerson}
-              onChange={(e) => setResponsiblePerson(e.target.value)}
-              required
-            />
+            {isAdmin ? (
+              <Select value={responsiblePerson} onValueChange={setResponsiblePerson}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select responsible person" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers.map((member) => (
+                    <SelectItem key={member.id} value={member.full_name || member.email}>
+                      {member.full_name || member.email} ({member.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="responsiblePerson"
+                value={memberName}
+                readOnly
+                className="bg-gray-100"
+                placeholder="Your name will be used"
+              />
+            )}
           </div>
           
           <div>
@@ -226,7 +275,7 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !complianceItem || !standardClause || !complianceStatus || (isAdmin && !responsiblePerson)}
             >
               {loading ? 'Adding...' : 'Add Record'}
             </Button>

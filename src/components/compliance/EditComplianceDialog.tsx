@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FileUpload } from './FileUpload';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 
 interface ComplianceRecord {
   id: string;
@@ -36,6 +37,7 @@ interface EditComplianceDialogProps {
 export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: EditComplianceDialogProps) => {
   const { organisationMember } = useAuth();
   const { toast } = useToast();
+  const { teamMembers } = useTeamMembers();
   const [complianceItem, setComplianceItem] = useState('');
   const [standardClause, setStandardClause] = useState('');
   const [complianceStatus, setComplianceStatus] = useState('');
@@ -44,6 +46,9 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
   const [notes, setNotes] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const isAdmin = organisationMember?.role === 'admin';
+  const memberName = organisationMember?.full_name || organisationMember?.email || '';
 
   useEffect(() => {
     if (record) {
@@ -58,7 +63,14 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organisationMember?.organisation_id || !record) return;
+    if (!organisationMember?.organisation_id || !record) {
+      toast({
+        title: "Error",
+        description: "Organisation or record not found",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -69,25 +81,37 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
       if (files.length > 0) {
         for (const file of files) {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${Math.random()}.${fileExt}`;
+          const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
           const filePath = `${organisationMember.organisation_id}/${fileName}`;
+
+          console.log('Uploading file:', filePath);
 
           const { error: uploadError } = await supabase.storage
             .from('compliance-evidence')
             .upload(filePath, file);
 
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            throw new Error(`Failed to upload file: ${uploadError.message}`);
+          }
 
           fileNames.push(file.name);
           filePaths.push(filePath);
         }
       }
 
+      // For members, use their name; for admins, use selected person
+      const finalResponsiblePerson = isAdmin ? responsiblePerson : memberName;
+
+      if (!finalResponsiblePerson) {
+        throw new Error('Responsible person is required');
+      }
+
       const updateData: any = {
         compliance_item: complianceItem,
         standard_clause: standardClause,
         compliance_status: complianceStatus,
-        responsible_person: responsiblePerson,
+        responsible_person: finalResponsiblePerson,
         next_review_date: nextReviewDate?.toISOString().split('T')[0] || null,
         notes: notes || null,
       };
@@ -98,12 +122,17 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
         updateData.file_path = filePaths.join(', ');
       }
 
+      console.log('Updating compliance record:', updateData);
+
       const { error } = await supabase
         .from('compliance_records')
         .update(updateData)
         .eq('id', record.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
 
       toast({
         title: "Success",
@@ -117,7 +146,7 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
       console.error('Error updating compliance record:', error);
       toast({
         title: "Error",
-        description: "Failed to update compliance record",
+        description: error instanceof Error ? error.message : "Failed to update compliance record",
         variant: "destructive",
       });
     } finally {
@@ -191,13 +220,28 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
           
           <div>
             <Label htmlFor="responsiblePerson">Responsible Person</Label>
-            <Input
-              id="responsiblePerson"
-              placeholder="Enter responsible person"
-              value={responsiblePerson}
-              onChange={(e) => setResponsiblePerson(e.target.value)}
-              required
-            />
+            {isAdmin ? (
+              <Select value={responsiblePerson} onValueChange={setResponsiblePerson}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select responsible person" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers.map((member) => (
+                    <SelectItem key={member.id} value={member.full_name || member.email}>
+                      {member.full_name || member.email} ({member.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="responsiblePerson"
+                value={memberName}
+                readOnly
+                className="bg-gray-100"
+                placeholder="Your name will be used"
+              />
+            )}
           </div>
           
           <div>
@@ -249,7 +293,7 @@ export const EditComplianceDialog = ({ open, onOpenChange, onSuccess, record }: 
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !complianceItem || !standardClause || !complianceStatus || (isAdmin && !responsiblePerson)}
             >
               {loading ? 'Updating...' : 'Update Record'}
             </Button>
