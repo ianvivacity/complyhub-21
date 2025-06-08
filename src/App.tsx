@@ -12,6 +12,8 @@ import { Navigation } from "@/components/navigation/Navigation";
 import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
 import { TeamMembers } from "@/pages/TeamMembers";
+import { Analytics } from "@/pages/Analytics";
+import { Messages } from "@/pages/Messages";
 import { AcceptInvitation } from "@/pages/AcceptInvitation";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,14 @@ const App = () => (
                           <Route 
                             path="/team" 
                             element={<TeamMembers />} 
+                          />
+                          <Route 
+                            path="/analytics" 
+                            element={<Analytics />} 
+                          />
+                          <Route 
+                            path="/messages" 
+                            element={<Messages />} 
                           />
                           <Route 
                             path="/settings" 
