@@ -115,38 +115,42 @@ export const ComplianceRecords = () => {
     }
   };
 
-  const handleViewFile = async (filePath: string, fileName: string) => {
+  const handleViewFiles = async (filePaths: string[], fileNames: string[]) => {
     try {
-      console.log('Downloading file:', filePath, fileName);
-      
-      const { data, error } = await supabase.storage
-        .from('compliance-evidence')
-        .download(filePath);
+      for (let i = 0; i < filePaths.length; i++) {
+        const filePath = filePaths[i];
+        const fileName = fileNames[i];
+        
+        if (filePath && fileName) {
+          console.log('Downloading file:', filePath, fileName);
+          
+          const { data, error } = await supabase.storage
+            .from('compliance-evidence')
+            .download(filePath);
 
-      if (error) {
-        console.error('Download error:', error);
-        throw error;
+          if (error) {
+            console.error('Download error:', error);
+            throw error;
+          }
+
+          // Create a blob URL and open in new tab
+          const url = URL.createObjectURL(data);
+          window.open(url, '_blank');
+          
+          // Clean up the URL after a delay to allow the tab to load
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
       }
-
-      // Create a blob URL and download the file
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
       
       toast({
         title: "Success",
-        description: "File downloaded successfully",
+        description: "Files opened successfully",
       });
     } catch (error) {
-      console.error('Error downloading file:', error);
+      console.error('Error opening files:', error);
       toast({
         title: "Error",
-        description: "Failed to download file",
+        description: "Failed to open files",
         variant: "destructive",
       });
     }
@@ -313,48 +317,38 @@ export const ComplianceRecords = () => {
                   
                   return (
                     <tr key={record.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{record.compliance_item}</td>
-                      <td className="py-3 px-4 text-gray-600">{record.standard_clause}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 font-medium table-entry">{record.compliance_item}</td>
+                      <td className="py-3 px-4 text-gray-600 table-entry">{record.standard_clause}</td>
+                      <td className="py-3 px-4 table-entry">
                         <span className={getStatusBadge(record.compliance_status)}>
                           {record.compliance_status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-gray-600">{record.responsible_person}</td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-gray-600 table-entry">{record.responsible_person}</td>
+                      <td className="py-3 px-4 text-gray-600 table-entry">
                         {record.next_review_date ? new Date(record.next_review_date).toLocaleDateString() : 'Not set'}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 table-entry">
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                           {record.review_status || 'Scheduled'}
                         </span>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 table-entry">
                         {fileNames.length > 0 && filePaths.length > 0 ? (
-                          <div className="space-y-1">
-                            {fileNames.map((fileName, index) => {
-                              const filePath = filePaths[index];
-                              if (!filePath) return null;
-                              
-                              return (
-                                <Button
-                                  key={index}
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewFile(filePath, fileName)}
-                                  className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300 mr-1 mb-1"
-                                >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  {fileName.length > 20 ? fileName.substring(0, 20) + '...' : fileName}
-                                </Button>
-                              );
-                            })}
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewFiles(filePaths, fileNames)}
+                            className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
                         ) : (
                           <span className="text-gray-400 text-sm">No files</span>
                         )}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 table-entry">
                         <div className="flex items-center space-x-2">
                           <Button 
                             variant="ghost" 

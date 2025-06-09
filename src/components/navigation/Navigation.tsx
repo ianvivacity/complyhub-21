@@ -48,14 +48,15 @@ export const Navigation = () => {
       href: '/messages',
       icon: MessageSquare,
       adminOnly: false
-    },
-    {
-      name: 'General Settings',
-      href: '/settings',
-      icon: Settings,
-      adminOnly: true
     }
   ];
+
+  const settingsItem = {
+    name: 'General Settings',
+    href: '/settings',
+    icon: Settings,
+    adminOnly: true
+  };
 
   const filteredMainNavItems = mainNavItems.filter(item => !item.adminOnly || isAdmin);
 
@@ -99,6 +100,30 @@ export const Navigation = () => {
           })}
         </ul>
       </div>
+
+      {/* Settings at the bottom */}
+      {isAdmin && (
+        <div className="px-4 pb-6 border-t pt-4">
+          <ul>
+            <li>
+              <Link
+                to={settingsItem.href}
+                className={cn(
+                  "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
+                  "py-3",
+                  location.pathname === settingsItem.href
+                    ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                )}
+                style={{ fontSize: '15px' }}
+              >
+                <Settings className="h-5 w-5 mr-3" />
+                <span>{settingsItem.name}</span>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      )}
     </nav>
   );
 };

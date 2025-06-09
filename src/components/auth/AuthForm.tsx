@@ -48,6 +48,14 @@ export const AuthForm = () => {
     }
   };
 
+  const handleRequestDemo = () => {
+    // Add demo request logic here
+    toast({
+      title: "Demo Requested",
+      description: "Thank you for your interest! We'll contact you soon."
+    });
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Brand and features */}
@@ -90,6 +98,16 @@ export const AuthForm = () => {
             </div>
           </div>
         </div>
+
+        {/* Request Demo Button */}
+        <div className="mt-8">
+          <Button 
+            onClick={handleRequestDemo}
+            className="bg-[#01b0f1] hover:bg-[#0190c1] text-white px-8 py-3 text-lg font-semibold"
+          >
+            Request A Demo
+          </Button>
+        </div>
       </div>
 
       {/* Right side - Login form */}
@@ -97,7 +115,9 @@ export const AuthForm = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardDescription style={{ color: 'rgb(75, 85, 99)' }}>
+              Enter your credentials to access your account
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignIn} className="space-y-4">

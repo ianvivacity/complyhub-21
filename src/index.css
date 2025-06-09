@@ -72,6 +72,7 @@
 @layer base {
   * {
     @apply border-border;
+    letter-spacing: 0.3px;
   }
   body {
     @apply bg-background text-foreground;
@@ -94,4 +95,14 @@
 .duration-300 {
   animation-duration: .3s;
   height: auto;
+}
+
+.opacity-90 {
+  opacity: .9;
+  font-size: 17px;
+  letter-spacing: 0.3px;
+}
+
+.table-entry {
+  font-size: 15px;
 }
