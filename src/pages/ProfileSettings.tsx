@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera, User, Mail, Phone, Shield, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
 
 export const ProfileSettings = () => {
   const { user, organisationMember } = useAuth();
@@ -16,6 +17,7 @@ export const ProfileSettings = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -99,8 +101,30 @@ export const ProfileSettings = () => {
 
       <div className="max-w-2xl">
         <Card className="bg-white">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl font-semibold">User Profile</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="flex items-center space-x-2"
+            >
+              <svg 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                <path d="m15 5 4 4"/>
+              </svg>
+              <span>Edit Profile</span>
+            </Button>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Avatar Upload Section */}
@@ -193,15 +217,15 @@ export const ProfileSettings = () => {
                 </div>
               </div>
             </div>
-
-            <div className="pt-4 border-t">
-              <p className="text-sm text-gray-500">
-                To update your profile information, please contact your administrator.
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
+
+      <EditProfileDialog 
+        open={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen}
+        organisationMember={organisationMember}
+      />
     </div>
   );
 };
