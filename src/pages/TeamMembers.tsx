@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, Users, Trash2, UserCheck, Crown } from 'lucide-react';
+import { Search, Users, Trash2, UserCheck, Crown, Building2, Hash, Mail, Phone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
@@ -30,14 +30,45 @@ interface TeamMember {
   phone_number?: string;
 }
 
+interface Organization {
+  id: string;
+  name: string;
+  rto_id?: string;
+  contact_email?: string;
+  contact_number?: string;
+}
+
 export const TeamMembers = () => {
   const { organisationMember } = useAuth();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isAdmin = organisationMember?.role === 'admin';
+
+  const fetchOrganization = async () => {
+    if (!organisationMember?.organisation_id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('organisations')
+        .select('*')
+        .eq('id', organisationMember.organisation_id)
+        .single();
+
+      if (error) throw error;
+      setOrganization(data);
+    } catch (error) {
+      console.error('Error fetching organization:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch organization details",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchTeamMembers = async () => {
     if (!organisationMember?.organisation_id) return;
@@ -64,6 +95,7 @@ export const TeamMembers = () => {
   };
 
   useEffect(() => {
+    fetchOrganization();
     fetchTeamMembers();
   }, [organisationMember]);
 
@@ -184,6 +216,53 @@ export const TeamMembers = () => {
         </div>
         {isAdmin && <InviteMemberDialog />}
       </div>
+
+      {/* Organization Information Card */}
+      {organization && (
+        <Card className="bg-white mb-6">
+          <CardContent className="p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Organization Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex items-center space-x-3">
+                <Building2 className="h-4 w-4 text-blue-500" />
+                <div>
+                  <div className="text-sm font-medium text-gray-600">Organization</div>
+                  <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
+                    {organization.name}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Hash className="h-4 w-4 text-green-500" />
+                <div>
+                  <div className="text-sm font-medium text-gray-600">RTO ID</div>
+                  <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
+                    {organization.rto_id || 'N/A'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail className="h-4 w-4 text-purple-500" />
+                <div>
+                  <div className="text-sm font-medium text-gray-600">Email</div>
+                  <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
+                    {organization.contact_email || 'N/A'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="h-4 w-4 text-orange-500" />
+                <div>
+                  <div className="text-sm font-medium text-gray-600">Phone Number</div>
+                  <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
+                    {organization.contact_number || 'N/A'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
