@@ -2,7 +2,8 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { LogOut, User } from 'lucide-react';
 
 export const Header = () => {
   const { user, organisationMember, signOut } = useAuth();
@@ -27,6 +28,15 @@ export const Header = () => {
     }
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,9 +59,23 @@ export const Header = () => {
           
           {user && (
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                Welcome, {organisationMember?.full_name || user.email}
-              </span>
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage 
+                    src={user?.user_metadata?.avatar_url} 
+                    alt="Profile picture" 
+                  />
+                  <AvatarFallback className="text-sm">
+                    {organisationMember?.full_name ? 
+                      getInitials(organisationMember.full_name) : 
+                      <User className="h-4 w-4" />
+                    }
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-gray-700">
+                  Welcome, {organisationMember?.full_name || user.email}
+                </span>
+              </div>
               <span className={getRoleStyles(getUserRole())}>
                 {getUserRole()}
               </span>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +16,6 @@ import {
 export const Navigation = () => {
   const { organisationMember } = useAuth();
   const location = useLocation();
-  const isAdmin = organisationMember?.role === 'admin';
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update time every minute
@@ -72,13 +72,13 @@ export const Navigation = () => {
   ];
 
   const settingsItem = {
-    name: 'General Settings',
+    name: 'Profile Settings',
     href: '/settings',
     icon: Settings,
-    adminOnly: true
+    adminOnly: false
   };
 
-  const filteredMainNavItems = mainNavItems.filter(item => !item.adminOnly || isAdmin);
+  const filteredMainNavItems = mainNavItems.filter(item => !item.adminOnly);
 
   return (
     <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300">
@@ -128,29 +128,27 @@ export const Navigation = () => {
         </ul>
       </div>
 
-      {/* Settings at the bottom */}
-      {isAdmin && (
-        <div className="px-4 pb-6 border-t pt-4">
-          <ul>
-            <li>
-              <Link
-                to={settingsItem.href}
-                className={cn(
-                  "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
-                  "py-3",
-                  location.pathname === settingsItem.href
-                    ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                )}
-                style={{ fontSize: '15px' }}
-              >
-                <Settings className="h-5 w-5 mr-3" />
-                <span>{settingsItem.name}</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
+      {/* Settings at the bottom - now available for all users */}
+      <div className="px-4 pb-6 border-t pt-4">
+        <ul>
+          <li>
+            <Link
+              to={settingsItem.href}
+              className={cn(
+                "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
+                "py-3",
+                location.pathname === settingsItem.href
+                  ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              )}
+              style={{ fontSize: '15px' }}
+            >
+              <Settings className="h-5 w-5 mr-3" />
+              <span>{settingsItem.name}</span>
+            </Link>
+          </li>
+        </ul>
+      </div>
     </nav>
   );
 };

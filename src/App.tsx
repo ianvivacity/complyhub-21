@@ -13,6 +13,7 @@ import { TeamMembers } from "@/pages/TeamMembers";
 import { Analytics } from "@/pages/Analytics";
 import { Messages } from "@/pages/Messages";
 import { AcceptInvitation } from "@/pages/AcceptInvitation";
+import { ProfileSettings } from "@/pages/ProfileSettings";
 
 const queryClient = new QueryClient();
 
@@ -51,14 +52,7 @@ const App = () => (
                     />
                     <Route 
                       path="/settings" 
-                      element={
-                        <ProtectedRoute adminOnly>
-                          <div className="p-6">
-                            <h1 className="text-3xl font-bold">Settings</h1>
-                            <p className="text-gray-600 mt-2">Configure system settings (Admin only).</p>
-                          </div>
-                        </ProtectedRoute>
-                      } 
+                      element={<ProfileSettings />} 
                     />
                   </Routes>
                 </AppLayout>
