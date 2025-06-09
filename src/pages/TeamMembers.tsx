@@ -192,23 +192,23 @@ export const TeamMembers = () => {
               <tbody>
                 {filteredMembers.map((member) => (
                   <tr key={member.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">
+                    <td className="py-3 px-4 font-medium table-entry">
                       {member.full_name || 'No name provided'}
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{member.email}</td>
-                    <td className="py-3 px-4 text-gray-600">
+                    <td className="py-3 px-4 text-gray-600 table-entry">{member.email}</td>
+                    <td className="py-3 px-4 text-gray-600 table-entry">
                       {member.phone_number || 'Not provided'}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 table-entry">
                       <span className={getRoleBadge(member.role)}>
                         {member.role}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">
+                    <td className="py-3 px-4 text-gray-600 table-entry">
                       {new Date(member.created_at).toLocaleDateString()}
                     </td>
                     {isAdmin && (
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 table-entry">
                         <div className="flex items-center space-x-2">
                           <Select
                             value={member.role}

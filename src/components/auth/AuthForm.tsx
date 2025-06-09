@@ -103,7 +103,8 @@ export const AuthForm = () => {
         <div className="mt-8">
           <Button 
             onClick={handleRequestDemo}
-            className="bg-[#01b0f1] hover:bg-[#0190c1] text-white px-8 py-3 text-lg font-semibold"
+            className="bg-[#01b0f1] hover:bg-[#0190c1] text-white px-8 py-3 text-lg"
+            style={{ fontWeight: 500 }}
           >
             Request A Demo
           </Button>

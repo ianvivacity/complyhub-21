@@ -149,12 +149,12 @@ export const Standards = () => {
               <tbody>
                 {filteredStandards.map((standard) => (
                   <tr key={standard.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{standard.standard_clause}</td>
-                    <td className="py-3 px-4 text-gray-600">{standard.standard_description}</td>
-                    <td className="py-3 px-4 text-gray-600">
+                    <td className="py-3 px-4 font-medium table-entry">{standard.standard_clause}</td>
+                    <td className="py-3 px-4 text-gray-600 table-entry">{standard.standard_description}</td>
+                    <td className="py-3 px-4 text-gray-600 table-entry">
                       {new Date(standard.created_at).toLocaleDateString()}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 table-entry">
                       <div className="flex items-center space-x-2">
                         <Button 
                           variant="ghost" 
