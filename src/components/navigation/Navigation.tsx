@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,13 +30,12 @@ export const Navigation = () => {
   const formatAustralianDateTime = (date: Date) => {
     return date.toLocaleString('en-AU', {
       timeZone: 'Australia/Sydney',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
-    });
+    }).replace(',', ',');
   };
 
   const mainNavItems = [
@@ -85,10 +83,10 @@ export const Navigation = () => {
   return (
     <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300">
       {/* Logo */}
-      <div className="p-4 border-b flex items-center">
+      <div className="p-4 flex items-center">
         <div className="flex items-center space-x-3 flex-1">
           <Shield className="h-6 w-6 text-[#7030a0]" />
-          <h1 className="text-lg font-semibold text-gray-900">
+          <h1 className="text-lg font-semibold gradient-text">
             ComplyHub
           </h1>
         </div>
@@ -96,8 +94,8 @@ export const Navigation = () => {
 
       {/* Australian Date/Time Display */}
       <div className="px-4 py-3 border-b">
-        <div className="text-gray-600 text-center" style={{ fontSize: '15px' }}>
-          {formatAustralianDateTime(currentTime)}
+        <div className="text-center" style={{ fontSize: '15px', color: '#020817' }}>
+          AU: {formatAustralianDateTime(currentTime)}
         </div>
       </div>
 

@@ -92,6 +92,13 @@
   background: linear-gradient(to right, #5e2680, #cc1567);
 }
 
+.gradient-text {
+  background: linear-gradient(to right, #7130A0, #ED1878);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .duration-300 {
   animation-duration: .3s;
   height: 100vh !important;
@@ -105,6 +112,12 @@
 
 .table-entry {
   font-size: 15px;
+}
+
+.p-4 {
+  padding: 1rem;
+  border-bottom: 0px;
+  padding-bottom: 0px;
 }
 
 .pt-4 {
