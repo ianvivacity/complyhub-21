@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -30,7 +29,7 @@ interface TeamMember {
   phone_number?: string;
 }
 
-interface Organization {
+interface Organisation {
   id: string;
   name: string;
   rto_id?: string;
@@ -43,12 +42,12 @@ export const TeamMembers = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [organisation, setOrganisation] = useState<Organisation | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isAdmin = organisationMember?.role === 'admin';
 
-  const fetchOrganization = async () => {
+  const fetchOrganisation = async () => {
     if (!organisationMember?.organisation_id) return;
 
     try {
@@ -59,12 +58,12 @@ export const TeamMembers = () => {
         .single();
 
       if (error) throw error;
-      setOrganization(data);
+      setOrganisation(data);
     } catch (error) {
-      console.error('Error fetching organization:', error);
+      console.error('Error fetching organisation:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch organization details",
+        description: "Failed to fetch organisation details",
         variant: "destructive",
       });
     }
@@ -95,7 +94,7 @@ export const TeamMembers = () => {
   };
 
   useEffect(() => {
-    fetchOrganization();
+    fetchOrganisation();
     fetchTeamMembers();
   }, [organisationMember]);
 
@@ -217,18 +216,18 @@ export const TeamMembers = () => {
         {isAdmin && <InviteMemberDialog />}
       </div>
 
-      {/* Organization Information Card */}
-      {organization && (
+      {/* Organisation Information Card */}
+      {organisation && (
         <Card className="bg-white mb-6">
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Organization Information</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Organisation Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center space-x-3">
                 <Building2 className="h-4 w-4 text-blue-500" />
                 <div>
-                  <div className="text-sm font-medium text-gray-600">Organization</div>
+                  <div className="text-sm font-medium text-gray-600">Organisation</div>
                   <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
-                    {organization.name}
+                    {organisation.name}
                   </div>
                 </div>
               </div>
@@ -237,7 +236,7 @@ export const TeamMembers = () => {
                 <div>
                   <div className="text-sm font-medium text-gray-600">RTO ID</div>
                   <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
-                    {organization.rto_id || 'N/A'}
+                    {organisation.rto_id || 'N/A'}
                   </div>
                 </div>
               </div>
@@ -246,7 +245,7 @@ export const TeamMembers = () => {
                 <div>
                   <div className="text-sm font-medium text-gray-600">Email</div>
                   <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
-                    {organization.contact_email || 'N/A'}
+                    {organisation.contact_email || 'N/A'}
                   </div>
                 </div>
               </div>
@@ -255,7 +254,7 @@ export const TeamMembers = () => {
                 <div>
                   <div className="text-sm font-medium text-gray-600">Phone Number</div>
                   <div className="text-sm text-gray-900" style={{ fontSize: '14px' }}>
-                    {organization.contact_number || 'N/A'}
+                    {organisation.contact_number || 'N/A'}
                   </div>
                 </div>
               </div>
