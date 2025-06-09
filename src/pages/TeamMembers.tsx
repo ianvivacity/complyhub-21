@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, Users, Trash2 } from 'lucide-react';
+import { Search, Users, Trash2, UserCheck, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
@@ -143,6 +143,30 @@ export const TeamMembers = () => {
     }
   };
 
+  const stats = [
+    { 
+      label: 'Total Members', 
+      value: teamMembers.length.toString(), 
+      subtitle: 'Active team members', 
+      icon: Users,
+      iconColor: 'text-blue-500'
+    },
+    { 
+      label: 'Administrators', 
+      value: teamMembers.filter(m => m.role === 'admin').length.toString(), 
+      subtitle: 'Admin users', 
+      icon: Crown,
+      iconColor: 'text-purple-500'
+    },
+    { 
+      label: 'Regular Members', 
+      value: teamMembers.filter(m => m.role === 'member').length.toString(), 
+      subtitle: 'Standard users', 
+      icon: UserCheck,
+      iconColor: 'text-green-500'
+    }
+  ];
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
@@ -159,6 +183,29 @@ export const TeamMembers = () => {
           <h1 className="text-3xl font-bold text-gray-900">Team Members</h1>
         </div>
         {isAdmin && <InviteMemberDialog />}
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index} className="bg-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-gray-600">{stat.label}</div>
+                    <div className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</div>
+                    <div className="text-sm text-gray-500 mt-1">{stat.subtitle}</div>
+                  </div>
+                  <div className={`p-3 rounded-full bg-gray-100 ${stat.iconColor}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Card>

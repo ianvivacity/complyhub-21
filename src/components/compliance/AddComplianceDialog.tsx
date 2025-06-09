@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,12 @@ interface AddComplianceDialogProps {
   onSuccess: () => void;
 }
 
+interface Standard {
+  id: string;
+  standard_clause: string;
+  standard_description: string;
+}
+
 export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddComplianceDialogProps) => {
   const { organisationMember } = useAuth();
   const { toast } = useToast();
@@ -35,9 +41,43 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
   const [notes, setNotes] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [standards, setStandards] = useState<Standard[]>([]);
+  const [standardsLoading, setStandardsLoading] = useState(true);
 
   const isAdmin = organisationMember?.role === 'admin';
   const memberName = organisationMember?.full_name || organisationMember?.email || '';
+
+  // Fetch standards when dialog opens
+  useEffect(() => {
+    if (open && organisationMember?.organisation_id) {
+      fetchStandards();
+    }
+  }, [open, organisationMember?.organisation_id]);
+
+  const fetchStandards = async () => {
+    if (!organisationMember?.organisation_id) return;
+
+    try {
+      setStandardsLoading(true);
+      const { data, error } = await supabase
+        .from('standards')
+        .select('*')
+        .eq('organisation_id', organisationMember.organisation_id)
+        .order('standard_clause', { ascending: true });
+
+      if (error) throw error;
+      setStandards(data || []);
+    } catch (error) {
+      console.error('Error fetching standards:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch standards",
+        variant: "destructive",
+      });
+    } finally {
+      setStandardsLoading(false);
+    }
+  };
 
   const createStorageBucket = async () => {
     try {
@@ -207,13 +247,21 @@ export const AddComplianceDialog = ({ open, onOpenChange, onSuccess }: AddCompli
           
           <div>
             <Label htmlFor="standardClause">Standard Clause</Label>
-            <Input
-              id="standardClause"
-              placeholder="Enter standard clause"
-              value={standardClause}
-              onChange={(e) => setStandardClause(e.target.value)}
-              required
-            />
+            <Select value={standardClause} onValueChange={setStandardClause}>
+              <SelectTrigger>
+                <SelectValue placeholder={standardsLoading ? "Loading standards..." : "Select standard clause"} />
+              </SelectTrigger>
+              <SelectContent>
+                {standards.map((standard) => (
+                  <SelectItem key={standard.id} value={standard.standard_clause}>
+                    {standard.standard_clause} - {standard.standard_description}
+                  </SelectItem>
+                ))}
+                {standards.length === 0 && !standardsLoading && (
+                  <SelectItem value="" disabled>No standards available</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
           
           <div>

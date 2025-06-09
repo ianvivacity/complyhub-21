@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,28 @@ export const Navigation = () => {
   const { organisationMember } = useAuth();
   const location = useLocation();
   const isAdmin = organisationMember?.role === 'admin';
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatAustralianDateTime = (date: Date) => {
+    return date.toLocaleString('en-AU', {
+      timeZone: 'Australia/Sydney',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
 
   const mainNavItems = [
     {
@@ -61,7 +83,7 @@ export const Navigation = () => {
   const filteredMainNavItems = mainNavItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
-    <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300" style={{ height: 'auto' }}>
+    <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300">
       {/* Logo */}
       <div className="p-4 border-b flex items-center">
         <div className="flex items-center space-x-3 flex-1">
@@ -69,6 +91,13 @@ export const Navigation = () => {
           <h1 className="text-lg font-semibold text-gray-900">
             ComplyHub
           </h1>
+        </div>
+      </div>
+
+      {/* Australian Date/Time Display */}
+      <div className="px-4 py-3 border-b">
+        <div className="text-gray-600 text-center" style={{ fontSize: '15px' }}>
+          {formatAustralianDateTime(currentTime)}
         </div>
       </div>
 
