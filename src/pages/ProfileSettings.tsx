@@ -26,31 +26,46 @@ export const ProfileSettings = () => {
       if (!event.target.files || event.target.files.length === 0) {
         throw new Error('You must select an image to upload.');
       }
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${user?.id}-${Math.random()}.${fileExt}`;
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      console.log('Uploading file:', fileName);
+
+      const { data, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
 
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      console.log('Upload successful:', data);
 
-      setAvatarUrl(data.publicUrl);
+      const { data: publicUrlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      console.log('Public URL:', publicUrlData.publicUrl);
+
+      setAvatarUrl(publicUrlData.publicUrl);
 
       // Update user metadata with avatar URL
       const { error: updateError } = await supabase.auth.updateUser({
-        data: { avatar_url: data.publicUrl }
+        data: { avatar_url: publicUrlData.publicUrl }
       });
 
       if (updateError) {
+        console.error('Update user error:', updateError);
         throw updateError;
       }
 
@@ -59,11 +74,11 @@ export const ProfileSettings = () => {
         description: "Avatar updated successfully!",
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error);
       toast({
         title: "Error",
-        description: "Failed to upload avatar. Please try again.",
+        description: error.message || "Failed to upload avatar. Please try again.",
         variant: "destructive",
       });
     } finally {
