@@ -8,15 +8,18 @@ import {
   FileText, 
   Users, 
   Settings,
-  BarChart3,
+  FolderOpen,
   MessageSquare,
-  Shield
+  Shield,
+  Menu,
+  X
 } from 'lucide-react';
 
 export const Navigation = () => {
   const { organisationMember } = useAuth();
   const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Update time every minute
   useEffect(() => {
@@ -58,9 +61,9 @@ export const Navigation = () => {
       adminOnly: false
     },
     {
-      name: 'Analytics & Reporting',
+      name: 'Documents Directories',
       href: '/analytics',
-      icon: BarChart3,
+      icon: FolderOpen,
       adminOnly: false
     },
     {
@@ -80,24 +83,47 @@ export const Navigation = () => {
 
   const filteredMainNavItems = mainNavItems.filter(item => !item.adminOnly);
 
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <nav className="bg-white shadow-sm border-r h-screen flex flex-col w-64 duration-300">
-      {/* Logo */}
-      <div className="p-4 flex items-center">
-        <div className="flex items-center space-x-3 flex-1">
+    <nav className={cn(
+      "bg-white shadow-sm border-r h-screen flex flex-col duration-300 transition-all",
+      isCollapsed ? "w-16" : "w-64"
+    )}>
+      {/* Logo and Toggle */}
+      <div className="p-4 flex items-center justify-between">
+        <div className={cn(
+          "flex items-center space-x-3 flex-1 transition-opacity duration-300",
+          isCollapsed ? "opacity-0" : "opacity-100"
+        )}>
           <Shield className="h-6 w-6 text-[#7030a0]" />
           <h1 className="text-lg font-semibold gradient-text">
             ComplyHub
           </h1>
         </div>
+        <button
+          onClick={toggleSidebar}
+          className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <Menu className="h-6 w-6 text-gray-600" />
+          ) : (
+            <X className="h-6 w-6 text-gray-600" />
+          )}
+        </button>
       </div>
 
       {/* Australian Date/Time Display */}
-      <div className="px-4 py-3 border-b">
-        <div className="text-center" style={{ fontSize: '15px', color: '#020817' }}>
-          AU: {formatAustralianDateTime(currentTime)}
+      {!isCollapsed && (
+        <div className="px-4 py-3 border-b">
+          <div className="text-center" style={{ fontSize: '15px', color: '#020817' }}>
+            AU: {formatAustralianDateTime(currentTime)}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main navigation */}
       <div className="px-4 py-6 flex-1">
@@ -111,16 +137,20 @@ export const Navigation = () => {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
-                    "py-3",
+                    "flex items-center font-medium rounded-md transition-colors border-0",
+                    isCollapsed ? "px-2 py-3 justify-center" : "px-3 py-3",
                     isActive
                       ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
                   style={{ fontSize: '15px' }}
+                  title={isCollapsed ? item.name : undefined}
                 >
-                  <Icon className="h-5 w-5 mr-3" />
-                  <span>{item.name}</span>
+                  <Icon className={cn(
+                    "h-6 w-6",
+                    isCollapsed ? "" : "mr-3"
+                  )} />
+                  {!isCollapsed && <span>{item.name}</span>}
                 </Link>
               </li>
             );
@@ -128,23 +158,29 @@ export const Navigation = () => {
         </ul>
       </div>
 
-      {/* Settings at the bottom - now available for all users */}
-      <div className="px-4 pb-6 border-t pt-4">
+      {/* Settings at the bottom */}
+      <div className={cn(
+        "px-4 pb-6 border-t pt-4"
+      )}>
         <ul>
           <li>
             <Link
               to={settingsItem.href}
               className={cn(
-                "flex items-center px-3 py-2 font-medium rounded-md transition-colors border-0",
-                "py-3",
+                "flex items-center font-medium rounded-md transition-colors border-0",
+                isCollapsed ? "px-2 py-3 justify-center" : "px-3 py-3",
                 location.pathname === settingsItem.href
                   ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               )}
               style={{ fontSize: '15px' }}
+              title={isCollapsed ? settingsItem.name : undefined}
             >
-              <Settings className="h-5 w-5 mr-3" />
-              <span>{settingsItem.name}</span>
+              <Settings className={cn(
+                "h-6 w-6",
+                isCollapsed ? "" : "mr-3"
+              )} />
+              {!isCollapsed && <span>{settingsItem.name}</span>}
             </Link>
           </li>
         </ul>
