@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Edit, Trash2, Database, BarChart3, Users, AlertTriangle, Eye } from 'lucide-react';
 import { AddComplianceDialog } from '@/components/compliance/AddComplianceDialog';
 import { EditComplianceDialog } from '@/components/compliance/EditComplianceDialog';
+import { FileViewerPopover } from '@/components/compliance/FileViewerPopover';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -372,19 +373,7 @@ export const ComplianceRecords = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 table-entry">
-                        {fileNames.length > 0 && filePaths.length > 0 ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewFiles(filePaths, fileNames)}
-                            className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        ) : (
-                          <span className="text-gray-400 text-sm">No files</span>
-                        )}
+                        <FileViewerPopover filePaths={filePaths} fileNames={fileNames} />
                       </td>
                       <td className="py-3 px-4 table-entry">
                         <div className="flex items-center space-x-2">
