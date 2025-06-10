@@ -41,12 +41,12 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       
       {/* Main content area */}
       <div 
-        className="flex-1 flex flex-col transition-all duration-300"
+        className="flex-1 flex flex-col"
         style={{ marginLeft: `${sidebarWidth}px` }}
       >
         {/* Fixed Header */}
         <div 
-          className="fixed top-0 right-0 z-30 transition-all duration-300"
+          className="fixed top-0 right-0 z-30"
           style={{ left: `${sidebarWidth}px` }}
         >
           <Header />

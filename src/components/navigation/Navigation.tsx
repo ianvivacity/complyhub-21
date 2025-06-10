@@ -89,7 +89,7 @@ export const Navigation = () => {
 
   return (
     <nav className={cn(
-      "bg-white shadow-sm border-r h-screen flex flex-col transition-all duration-300",
+      "bg-white shadow-sm border-r h-screen flex flex-col",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Logo and Toggle */}
@@ -104,7 +104,7 @@ export const Navigation = () => {
         )}
         <button
           onClick={toggleSidebar}
-          className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+          className="p-1 rounded-md hover:bg-gray-100"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -136,7 +136,7 @@ export const Navigation = () => {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center font-medium rounded-md transition-colors border-0",
+                    "flex items-center font-medium rounded-md border-0",
                     isCollapsed ? "px-2 py-3 justify-center" : "px-3 py-3",
                     isActive
                       ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
@@ -146,7 +146,7 @@ export const Navigation = () => {
                   title={isCollapsed ? item.name : undefined}
                 >
                   <Icon className={cn(
-                    "h-6 w-6",
+                    "h-6 w-6 flex-shrink-0",
                     isCollapsed ? "" : "mr-3"
                   )} />
                   {!isCollapsed && <span>{item.name}</span>}
@@ -164,7 +164,7 @@ export const Navigation = () => {
             <Link
               to={settingsItem.href}
               className={cn(
-                "flex items-center font-medium rounded-md transition-colors border-0",
+                "flex items-center font-medium rounded-md border-0",
                 isCollapsed ? "px-2 py-3 justify-center" : "px-3 py-3",
                 location.pathname === settingsItem.href
                   ? "bg-[rgb(243,232,255)] text-[rgb(107,33,168)]"
@@ -174,7 +174,7 @@ export const Navigation = () => {
               title={isCollapsed ? settingsItem.name : undefined}
             >
               <Settings className={cn(
-                "h-6 w-6",
+                "h-6 w-6 flex-shrink-0",
                 isCollapsed ? "" : "mr-3"
               )} />
               {!isCollapsed && <span>{settingsItem.name}</span>}
