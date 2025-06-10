@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -164,6 +163,20 @@ export const ComplianceRecords = () => {
       setSearchParams({ filter: filterType });
     } else {
       setSearchParams({});
+    }
+  };
+
+  const getReviewStatusBadge = (status: string) => {
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+    switch (status?.toLowerCase()) {
+      case 'reviewing':
+        return `${baseClasses} bg-green-100 text-green-800`;
+      case 'in progress':
+        return `${baseClasses} bg-yellow-100 text-yellow-800`;
+      case 'overdue':
+        return `${baseClasses} bg-red-100 text-red-800`;
+      default:
+        return `${baseClasses} bg-yellow-100 text-yellow-800`;
     }
   };
 
@@ -354,7 +367,7 @@ export const ComplianceRecords = () => {
                         {record.next_review_date ? new Date(record.next_review_date).toLocaleDateString() : 'Not set'}
                       </td>
                       <td className="py-3 px-4 table-entry">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span className={getReviewStatusBadge(record.review_status)}>
                           {record.review_status || 'Scheduled'}
                         </span>
                       </td>

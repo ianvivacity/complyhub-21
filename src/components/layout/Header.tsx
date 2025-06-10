@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,9 +8,14 @@ import { LogOut, User } from 'lucide-react';
 
 export const Header = () => {
   const { user, organisationMember, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleProfileClick = () => {
+    navigate('/settings');
   };
 
   const getUserRole = () => {
@@ -60,7 +66,10 @@ export const Header = () => {
           {user && (
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <Avatar className="h-8 w-8">
+                <Avatar 
+                  className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
+                  onClick={handleProfileClick}
+                >
                   <AvatarImage 
                     src={user?.user_metadata?.avatar_url} 
                     alt="Profile picture" 
