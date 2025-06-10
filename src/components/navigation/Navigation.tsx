@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,12 +63,6 @@ export const Navigation = () => {
       name: 'Documents Directories',
       href: '/analytics',
       icon: FolderOpen,
-      adminOnly: false
-    },
-    {
-      name: 'Message Center',
-      href: '/messages',
-      icon: MessageSquare,
       adminOnly: false
     }
   ];

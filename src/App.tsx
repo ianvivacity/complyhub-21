@@ -11,7 +11,6 @@ import { ComplianceRecords } from "@/pages/ComplianceRecords";
 import { Standards } from "@/pages/Standards";
 import { TeamMembers } from "@/pages/TeamMembers";
 import { Analytics } from "@/pages/Analytics";
-import { Messages } from "@/pages/Messages";
 import { AcceptInvitation } from "@/pages/AcceptInvitation";
 import { ProfileSettings } from "@/pages/ProfileSettings";
 
@@ -45,10 +44,6 @@ const App = () => (
                     <Route 
                       path="/analytics" 
                       element={<Analytics />} 
-                    />
-                    <Route 
-                      path="/messages" 
-                      element={<Messages />} 
                     />
                     <Route 
                       path="/settings" 

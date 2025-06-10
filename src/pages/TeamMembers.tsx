@@ -125,27 +125,27 @@ export const TeamMembers = () => {
 
   const handleDeleteMember = async (memberId: string) => {
     try {
-      // First delete from organisation_members
+      console.log('Attempting to delete member:', memberId);
+      
+      // Delete from organisation_members table
       const { error: memberError } = await supabase
         .from('organisation_members')
         .delete()
         .eq('id', memberId);
 
-      if (memberError) throw memberError;
-
-      // Then delete from auth.users (this requires service role)
-      const { error: authError } = await supabase.auth.admin.deleteUser(memberId);
-      
-      if (authError) {
-        console.warn('Could not delete user from auth:', authError);
-        // Don't throw here as the org member was already deleted
+      if (memberError) {
+        console.error('Error deleting from organisation_members:', memberError);
+        throw memberError;
       }
+
+      console.log('Successfully deleted from organisation_members');
 
       toast({
         title: "Success",
-        description: "Team member deleted successfully",
+        description: "Team member removed successfully",
       });
 
+      // Refresh the team members list
       fetchTeamMembers();
     } catch (error) {
       console.error('Error deleting member:', error);
