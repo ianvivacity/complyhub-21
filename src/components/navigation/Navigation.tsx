@@ -89,20 +89,19 @@ export const Navigation = () => {
 
   return (
     <nav className={cn(
-      "bg-white shadow-sm border-r h-screen flex flex-col duration-300 transition-all",
+      "bg-white shadow-sm border-r h-screen flex flex-col transition-all duration-300",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Logo and Toggle */}
       <div className="p-4 flex items-center justify-between">
-        <div className={cn(
-          "flex items-center space-x-3 flex-1 transition-opacity duration-300",
-          isCollapsed ? "opacity-0" : "opacity-100"
-        )}>
-          <Shield className="h-6 w-6 text-[#7030a0]" />
-          <h1 className="text-lg font-semibold gradient-text">
-            ComplyHub
-          </h1>
-        </div>
+        {!isCollapsed && (
+          <div className="flex items-center space-x-3 flex-1">
+            <Shield className="h-6 w-6 text-[#7030a0]" />
+            <h1 className="text-lg font-semibold gradient-text">
+              ComplyHub
+            </h1>
+          </div>
+        )}
         <button
           onClick={toggleSidebar}
           className="p-1 rounded-md hover:bg-gray-100 transition-colors"
@@ -159,9 +158,7 @@ export const Navigation = () => {
       </div>
 
       {/* Settings at the bottom */}
-      <div className={cn(
-        "px-4 pb-6 border-t pt-4"
-      )}>
+      <div className="px-4 pb-6 border-t pt-4">
         <ul>
           <li>
             <Link

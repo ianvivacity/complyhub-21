@@ -8,7 +8,7 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
-  const [sidebarWidth, setSidebarWidth] = useState(256); // 64px collapsed, 256px expanded
+  const [sidebarWidth, setSidebarWidth] = useState(256);
 
   // Listen for sidebar width changes
   useEffect(() => {
