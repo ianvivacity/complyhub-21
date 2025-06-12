@@ -195,6 +195,12 @@ export const TeamMembers = () => {
     }
   };
 
+  const handleMemberClick = (member: TeamMember) => {
+    console.log('Clicked on member:', member);
+    // You can add navigation or modal opening logic here
+    // For example: navigate(`/team/${member.id}`) or open a profile modal
+  };
+
   const filteredMembers = teamMembers.filter(member =>
     member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (member.full_name && member.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -362,7 +368,11 @@ export const TeamMembers = () => {
               </thead>
               <tbody>
                 {filteredMembers.map((member) => (
-                  <tr key={member.id} className="border-b hover:bg-gray-50">
+                  <tr 
+                    key={member.id} 
+                    className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => handleMemberClick(member)}
+                  >
                     <td className="py-3 px-4 font-medium table-entry">
                       {member.full_name || 'No name provided'}
                     </td>
@@ -379,7 +389,7 @@ export const TeamMembers = () => {
                       {new Date(member.created_at).toLocaleDateString()}
                     </td>
                     {isAdmin && (
-                      <td className="py-3 px-4 table-entry">
+                      <td className="py-3 px-4 table-entry" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center space-x-2">
                           <Select
                             value={member.role}

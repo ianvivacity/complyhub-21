@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -60,7 +61,7 @@ export const Navigation = () => {
       adminOnly: false
     },
     {
-      name: 'Documents Directories',
+      name: 'Document Section',
       href: '/analytics',
       icon: FolderOpen,
       adminOnly: false
