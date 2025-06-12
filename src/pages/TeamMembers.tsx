@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -127,18 +128,17 @@ export const TeamMembers = () => {
     try {
       console.log('Attempting to delete member:', memberId);
       
-      // Delete from organisation_members table
-      const { error: memberError } = await supabase
+      const { error } = await supabase
         .from('organisation_members')
         .delete()
         .eq('id', memberId);
 
-      if (memberError) {
-        console.error('Error deleting from organisation_members:', memberError);
-        throw memberError;
+      if (error) {
+        console.error('Error deleting member:', error);
+        throw error;
       }
 
-      console.log('Successfully deleted from organisation_members');
+      console.log('Successfully deleted member');
 
       toast({
         title: "Success",
@@ -151,7 +151,7 @@ export const TeamMembers = () => {
       console.error('Error deleting member:', error);
       toast({
         title: "Error",
-        description: "Failed to delete team member",
+        description: "Failed to delete team member. You may not have permission to perform this action.",
         variant: "destructive",
       });
     }
@@ -358,15 +358,18 @@ export const TeamMembers = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure you want to delete this user?</AlertDialogTitle>
+                                <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete the user account and remove them from the organization.
+                                  Are you sure you want to remove {member.full_name || member.email} from the team? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteMember(member.id)}>
-                                  Delete
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteMember(member.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Remove Member
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
