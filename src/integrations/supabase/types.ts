@@ -288,6 +288,13 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_user_organisation_and_role: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          organisation_id: string
+          role: string
+        }[]
+      }
       get_user_organisation_id: {
         Args: Record<PropertyKey, never>
         Returns: string

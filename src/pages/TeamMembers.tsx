@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -71,22 +70,32 @@ export const TeamMembers = () => {
   };
 
   const fetchTeamMembers = async () => {
-    if (!organisationMember?.organisation_id) return;
+    if (!organisationMember?.organisation_id) {
+      setLoading(false);
+      return;
+    }
 
     try {
+      console.log('Fetching team members for organisation:', organisationMember.organisation_id);
+      
       const { data, error } = await supabase
         .from('organisation_members')
         .select('*')
         .eq('organisation_id', organisationMember.organisation_id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching team members:', error);
+        throw error;
+      }
+      
+      console.log('Successfully fetched team members:', data);
       setTeamMembers(data || []);
     } catch (error) {
       console.error('Error fetching team members:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch team members",
+        description: "Failed to fetch team members. Please try refreshing the page.",
         variant: "destructive",
       });
     } finally {
@@ -95,18 +104,38 @@ export const TeamMembers = () => {
   };
 
   useEffect(() => {
-    fetchOrganisation();
-    fetchTeamMembers();
+    if (organisationMember) {
+      fetchOrganisation();
+      fetchTeamMembers();
+    } else {
+      setLoading(false);
+    }
   }, [organisationMember]);
 
   const handleRoleUpdate = async (memberId: string, newRole: 'admin' | 'member') => {
+    if (!isAdmin) {
+      toast({
+        title: "Error",
+        description: "You don't have permission to update member roles",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      console.log('Updating role for member:', memberId, 'to:', newRole);
+      
       const { error } = await supabase
         .from('organisation_members')
         .update({ role: newRole })
         .eq('id', memberId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating role:', error);
+        throw error;
+      }
+
+      console.log('Successfully updated role');
 
       toast({
         title: "Success",
@@ -118,13 +147,22 @@ export const TeamMembers = () => {
       console.error('Error updating role:', error);
       toast({
         title: "Error",
-        description: "Failed to update member role",
+        description: "Failed to update member role. You may not have permission to perform this action.",
         variant: "destructive",
       });
     }
   };
 
   const handleDeleteMember = async (memberId: string) => {
+    if (!isAdmin) {
+      toast({
+        title: "Error",
+        description: "You don't have permission to remove team members",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       console.log('Attempting to delete member:', memberId);
       
@@ -202,6 +240,14 @@ export const TeamMembers = () => {
     return (
       <div className="p-6 flex items-center justify-center">
         <div className="text-lg">Loading team members...</div>
+      </div>
+    );
+  }
+
+  if (!organisationMember) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Please log in to view team members.</div>
       </div>
     );
   }
@@ -385,7 +431,10 @@ export const TeamMembers = () => {
 
           {filteredMembers.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No team members found matching your search.
+              {teamMembers.length === 0 
+                ? "No team members found. Invite your first team member to get started!"
+                : "No team members found matching your search."
+              }
             </div>
           )}
         </CardContent>
